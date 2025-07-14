@@ -9,6 +9,11 @@ Instrument for monitoring and managing experimental data at a scientific facilit
 - Save only new experiment numbers with the ability to edit them.
 - Editing JSON settings via the interface with the "Back", "Reset" and "Save" buttons.
 
+## Build ```.exe```
+1. Run in terminal ```pip install pyinstaller``` (pip required)
+2. Then go to ```cd {dir of the app}``` and build by ```pyinstaller --onefile --add-data "templates;templates" app.py```
+```.exe``` file will be in the ```\dist``` dir.
+
 ## Technology
 - Programming language: Python.
 - Framework: Flask.
