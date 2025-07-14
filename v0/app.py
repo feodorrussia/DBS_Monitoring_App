@@ -5,63 +5,74 @@ import json
 
 app = Flask(__name__)
 
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Загрузка настроек
-settings_file = 'settings.json'
+settings_file = os.path.join(ROOT_DIR, 'settings.json')
 if os.path.exists(settings_file):
     with open(settings_file, 'r') as f:
         settings = json.load(f)
 else:
     settings = {
-        'folder_path': '',
-        'file_pattern': 'Dref(\\d{5})',
-        'file_type': '.SHT',
-        'output_folder': '',
-        'output_file': 'experiments.txt',
-        'metadata_header': 'Default metadata header'
+        "folder_path": "",
+        "file_pattern": "Dref(\\d{5})",
+        "file_types": [".SHT", ".dat", ".txt", "All files (*.*)"],
+        "selected_file_type": ".SHT",
+        "output_folder": "",
+        "output_file": "experiments.txt",
+        "metadata_header": "Default metadata header"
     }
 
 
 # Сохранение настроек
 def save_settings():
     with open(settings_file, 'w') as f:
-        json.dump(settings, f)
+        json.dump(settings, f, indent=4)
 
 
-# Маршрут для главной страницы
+# Главная страница
 @app.route('/')
 def index():
     return render_template('index.html', settings=settings)
 
 
-# Маршрут для сканирования папки
+# Сканирование файлов
 @app.route('/scan', methods=['POST'])
 def scan_files():
     try:
         data = request.json
         folder_path = data.get('folder_path', settings['folder_path'])
         regex = data.get('regex', settings['file_pattern'])
-        file_type = data.get('file_type', settings['file_type'])
+        file_type = data.get('file_type', settings['selected_file_type'])
+        output_folder = data.get('output_folder', settings['output_folder'])
+        output_file = data.get('output_file', settings['output_file'])
 
         if not os.path.exists(folder_path):
-            return jsonify({'error': 'Directory not found'}), 400
+            return jsonify({'error': 'Input directory not found'}), 400
+        if output_folder == '':
+            output_folder = ROOT_DIR
+        elif not os.path.exists(output_folder):
+            return jsonify({'error': 'Output directory not found'}), 400
 
         # Обновление настроек
         settings['folder_path'] = folder_path
         settings['file_pattern'] = regex
-        settings['file_type'] = file_type
+        settings['selected_file_type'] = file_type
+        settings['output_folder'] = output_folder
+        settings['output_file'] = output_file
         save_settings()
 
         experiments = []
         for filename in os.listdir(folder_path):
-            if file_type and not filename.lower().endswith(file_type.lower()):
+            if file_type and 'all' not in file_type.lower() and not filename.lower().endswith(file_type.lower()):
                 continue
             match = re.search(regex, filename)
-            if match and match.group(1):  # Извлекаем только группу с номером
+            if match and match.group(1):
                 experiment_number = match.group(1)
                 experiments.append(experiment_number)
 
         # Чтение уже сохранённых экспериментов
-        output_file_path = os.path.join(settings.get('output_folder', ''),
+        output_file_path = os.path.join(settings.get('output_folder', ROOT_DIR),
                                         settings.get('output_file', 'experiments.txt'))
         existing_experiments = set()
         if os.path.exists(output_file_path):
@@ -69,14 +80,14 @@ def scan_files():
                 for line in f:
                     existing_experiments.add(line.strip())
 
-        # Фильтруем только новые эксперименты
+        # Фильтрация новых экспериментов
         new_experiments = [exp for exp in experiments if exp not in existing_experiments]
         return jsonify({'experiments': new_experiments})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
-# Маршрут для сохранения результатов
+# Сохранение результатов
 @app.route('/save', methods=['POST'])
 def save_files():
     try:
@@ -110,18 +121,19 @@ def save_files():
             for exp in new_experiments:
                 f.write(f"{exp}\n")
 
-        return jsonify({'message': f'Saved successfully. Added {len(new_experiments)} new experiments.',
+        return jsonify({'message': f'Saved successfully to {output_file_path}.\nAdded {len(new_experiments)} new experiments.',
                         'new_experiments': new_experiments})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 
-# Маршрут для редактирования настроек
+# Страница настроек
 @app.route('/settings')
 def settings_page():
     return render_template('settings.html', settings=settings)
 
 
+# Сохранение настроек
 @app.route('/save_settings', methods=['POST'])
 def save_settings_route():
     try:
