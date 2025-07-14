@@ -6,6 +6,6 @@
 *.iml
 out
 gen
-!/settings.json
 
-!/experiments.txt
+*.json
+*.txt
