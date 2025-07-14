@@ -9,3 +9,8 @@ gen
 
 *.json
 *.txt
+*build/
+
+*dist/
+
+*app.spec
