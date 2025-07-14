@@ -2,8 +2,14 @@ from flask import Flask, render_template, request, jsonify
 import os
 import re
 import json
+import sys
 
-app = Flask(__name__)
+if getattr(sys, 'frozen', False):
+    template_folder = os.path.join(sys._MEIPASS, 'templates')
+else:
+    template_folder = 'templates'
+
+app = Flask(__name__, template_folder=template_folder)
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -49,7 +55,7 @@ def scan_files():
 
         if not os.path.exists(folder_path):
             return jsonify({'error': 'Input directory not found'}), 400
-        if output_folder == '':
+        if not output_folder:
             output_folder = ROOT_DIR
         elif not os.path.exists(output_folder):
             return jsonify({'error': 'Output directory not found'}), 400
