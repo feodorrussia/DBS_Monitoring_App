@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experiment Monitor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 15px;
+        }
+        .status {
+            color: red;
+        }
+        .status.success {
+            color: green;
+        }
+        #editSettingsBtn {
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>') no-repeat left center;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Experiment Monitor</h1>
+        <button id="editSettingsBtn">Edit Settings</button>
+        <form id="settingsForm">
+            <label for="folderPath">Input Directory Path:</label>
+            <input type="text" id="folderPath" name="folderPath" placeholder="Enter directory path" value="{{ settings.folder_path }}">
+            <button type="button" id="selectInputFolderBtn">Select Folder</button>
+
+            <label for="filePattern">File Name Pattern:</label>
+            <input type="text" id="filePattern" name="filePattern" placeholder="e.g., Dref(\d{5})" value="{{ settings.file_pattern }}">
+
+            <label for="fileType">File Type:</label>
+            <select id="fileType" name="fileType">
+                <option value=".SHT" {% if settings.file_type == '.SHT' %}selected{% endif %}> .SHT</option>
+                <option value=".dat" {% if settings.file_type == '.dat' %}selected{% endif %}> .dat</option>
+                <option value=".txt" {% if settings.file_type == '.txt' %}selected{% endif %}> .txt</option>
+                <option value="" {% if settings.file_type == '' %}selected{% endif %}> All files</option>
+            </select>
+
+            <label for="outputFolder">Output Directory Path:</label>
+            <input type="text" id="outputFolder" name="outputFolder" placeholder="Enter output directory path" value="{{ settings.output_folder }}">
+            <button type="button" id="selectOutputFolderBtn">Select Folder</button>
+
+            <label for="outputFile">Output File Name:</label>
+            <input type="text" id="outputFile" name="outputFile" placeholder="e.g., experiments.txt" value="{{ settings.output_file }}">
+
+            <button type="button" id="executeBtn">Execute</button>
+        </form>
+
+        <div id="results" style="margin-top: 20px;">
+            <h2>Results</h2>
+            <p id="status" class="status"></p>
+            <textarea id="experimentsList" rows="10"></textarea>
+        </div>
+
+        <div id="metadata" style="margin-top: 20px; display: none;">
+            <h2>Metadata Header</h2>
+            <textarea id="metadataHeader" rows="5" placeholder="Enter metadata header">{{ settings.metadata_header }}</textarea>
+            <button type="button" id="saveBtn">Save</button>
+    <button type="button" id="backSettingsBtn" onclick="location.href='/'">Reset</button>
+        </div>
+    </div>
+
+    <script>
+        // Кнопка для выбора входной папки
+        document.getElementById('selectInputFolderBtn').addEventListener('click', function() {
+            alert('Folder selection is not supported in this web application. Please enter the path manually.');
+        });
+
+        // Кнопка для выбора выходной папки
+        document.getElementById('selectOutputFolderBtn').addEventListener('click', function() {
+            alert('Folder selection is not supported in this web application. Please enter the path manually.');
+        });
+
+        // Кнопка для выполнения сканирования
+        document.getElementById('executeBtn').addEventListener('click', function() {
+            const folderPath = document.getElementById('folderPath').value;
+            const filePattern = document.getElementById('filePattern').value;
+            const fileType = document.getElementById('fileType').value;
+
+            fetch('/scan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    folder_path: folderPath,
+                    regex: filePattern,
+                    file_type: fileType
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('status').textContent = 'Error: ' + data.error;
+                    document.getElementById('status').className = 'status';
+                } else {
+                    document.getElementById('status').textContent = 'Found ' + data.experiments.length + ' new experiments.';
+                    document.getElementById('status').className = 'status success';
+                    document.getElementById('experimentsList').value = data.experiments.join('\n');
+                    document.getElementById('metadata').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                document.getElementById('status').textContent = 'An error occurred: ' + error;
+                document.getElementById('status').className = 'status';
+            });
+        });
+
+        // Кнопка для сохранения
+        document.getElementById('saveBtn').addEventListener('click', function() {
+            const experiments = document.getElementById('experimentsList').value.split('\n').filter(exp => exp.trim() !== '');
+            const outputFolder = document.getElementById('outputFolder').value;
+            const outputFile = document.getElementById('outputFile').value;
+            const metadataHeader = document.getElementById('metadataHeader').value;
+
+            fetch('/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    experiments: experiments,
+                    output_folder: outputFolder,
+                    output_file: outputFile,
+                    metadata_header: metadataHeader
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error saving file: ' + data.error);
+                } else {
+                    alert(data.message);
+                    // Сброс полей
+                    document.getElementById('experimentsList').value = '';
+                    document.getElementById('metadata').style.display = 'none';
+                    document.getElementById('status').textContent = '';
+                    document.getElementById('status').className = 'status';
+                }
+            })
+            .catch(error => {
+                alert('An error occurred: ' + error);
+            });
+        });
+
+        // Кнопка для редактирования настроек
+        document.getElementById('editSettingsBtn').addEventListener('click', function() {
+            window.location.href = '/settings';
+        });
+    </script>
+</body>
+</html>
