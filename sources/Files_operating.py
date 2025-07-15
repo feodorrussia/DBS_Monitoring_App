@@ -1,3 +1,5 @@
+import textwrap
+
 import numpy as np
 import pandas as pd
 import os
@@ -48,7 +50,7 @@ def save_df_to_txt(df: pd.DataFrame, file_name: str, file_path: str, meta: str =
     pd_save_mode = "w"
     if meta is not None:
         line_width = 25
-        printed_meta = meta  # formating meta for good-looking
+        printed_meta = textwrap.fill(meta, width=line_width)  # formating meta for good-looking
         with open(file_path_name, "w") as text_file:
             text_file.write(printed_meta + "\n" + "=" * line_width + "\n")
             text_file.close()
