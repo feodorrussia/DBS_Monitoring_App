@@ -33,3 +33,25 @@ def load_sht(file_path: str, column_names: list = None, data_names: list = None)
     data = np.array([res[column_names[0]]["x"]] + [res[column_name]["y"] for column_name in column_names])
     dalpha_df = pd.DataFrame(data.transpose(), columns=["t"] + data_names)
     return dalpha_df
+
+
+def save_df_to_txt(df: pd.DataFrame, file_name: str, file_path: str, meta: str = None) -> None:
+    """
+    Function to save a dataframe to a text file with additional meta info.
+    :param file_name: file name of saving file
+    :param df: pd.DataFrame to save
+    :param file_path: path to save data
+    :param meta: (optional) additional meta info
+    :return:
+    """
+    file_path_name = file_path + file_name + ".txt"
+    pd_save_mode = "w"
+    if meta is not None:
+        line_width = 25
+        printed_meta = meta  # formating meta for good-looking
+        with open(file_path_name, "w") as text_file:
+            text_file.write(printed_meta + "\n" + "=" * line_width + "\n")
+            text_file.close()
+        pd_save_mode = "a"
+
+    df.to_csv(file_path, index=False, mode=pd_save_mode)
