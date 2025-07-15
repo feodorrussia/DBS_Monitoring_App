@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 
 
-def complex_to_magnitude(df: pd.DataFrame, time: bool = True) -> pd.DataFrame:
+def calc_magnitude(df: pd.DataFrame, time: bool = True) -> pd.DataFrame:
     """
     Calculate magnitude from df of complex data
     :param df: pd.DataFrame of the complex data
