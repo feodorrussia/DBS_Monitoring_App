@@ -25,7 +25,7 @@ def load_sht(file_path: str, column_names: list = None, data_names: list = None)
         res = shtRipper.ripper.read(file_path + ".SHT")
 
     if column_names is None:
-        column_names = res.keys()
+        column_names = list(res.keys())
 
     if data_names is None:
         data_names = column_names
