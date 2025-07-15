@@ -15,3 +15,4 @@ gen
 
 *app.spec
 /test.py
+*.pyc
