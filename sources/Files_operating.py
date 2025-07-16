@@ -33,7 +33,7 @@ def load_sht(file_path: str, column_names: list = None, data_names: list = None)
         raise ValueError("Number of columns & names does not match")
 
     data = np.array([res[column_names[0]]["x"]] + [res[column_name]["y"] for column_name in column_names])
-    dalpha_df = pd.DataFrame(data.transpose(), columns=["t"] + data_names)
+    dalpha_df = pd.DataFrame(data.transpose(), columns=["t"] + data_names).sort_index(axis=1)
     return dalpha_df
 
 
