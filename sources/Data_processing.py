@@ -10,11 +10,12 @@ def calc_magnitude(df: pd.DataFrame, time: bool = True) -> pd.DataFrame:
     :return:
     """
     if time:
-        sq_data = df.drop(["t"], axis=1).pow(2).to_numpy()
+        point_data = df.drop(["t"], axis=1).to_numpy().reshape(-1, df.shape[1] // 2, 2)
     else:
-        sq_data = df.pow(2).to_numpy()
+        point_data = df.to_numpy().reshape(-1, df.shape[1] // 2, 2)
 
-    magnitude = sq_data.reshape(-1, sq_data.shape[1] // 2, 2).sum(axis=2)
+    z_data = point_data[:, :, 0] + 1j * point_data[:, :, 1]
+    magnitude = np.abs(z_data)
 
     if time:
         magnitude_df = pd.DataFrame(magnitude, columns=[f"ch{i}" for i in range(1, magnitude.shape[1] + 1)])
