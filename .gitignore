@@ -14,5 +14,6 @@ gen
 *dist/
 
 *app.spec
-/test.py
+/Exemple_1.py
 *.pyc
+/Exemple_2.py
