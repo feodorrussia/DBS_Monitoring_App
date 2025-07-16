@@ -49,11 +49,11 @@ def save_df_to_txt(df: pd.DataFrame, file_name: str, file_path: str, meta: str =
     file_path_name = file_path + file_name + ".txt"
     pd_save_mode = "w"
     if meta is not None:
-        line_width = 25
+        line_width = 70
         printed_meta = textwrap.fill(meta, width=line_width)  # formating meta for good-looking
         with open(file_path_name, "w") as text_file:
             text_file.write(printed_meta + "\n" + "=" * line_width + "\n")
             text_file.close()
         pd_save_mode = "a"
 
-    df.to_csv(file_path, index=False, mode=pd_save_mode)
+    df.to_csv(file_path_name, index=False, mode=pd_save_mode)
