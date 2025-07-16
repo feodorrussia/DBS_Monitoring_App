@@ -2,6 +2,31 @@ import numpy as np
 import pandas as pd
 
 
+def scale_norm(array: np.array) -> np.array:
+    return (array - np.mean(array)) / np.std(array)
+
+
+def normalise(df: pd.DataFrame, time: bool = True) -> pd.DataFrame:
+    """
+    Function to normalise the data: (x - x.mean()) / x.std()
+    :param df: pd.DataFrame of the complex data
+    :param time: is first column is **t** - time
+    :return:
+    """
+    if time:
+        data = df.drop(["t"], axis=1).to_numpy()
+    else:
+        data = df.to_numpy()
+
+    normalised_data = np.apply_along_axis(func1d=scale_norm, arr=data, axis=0)
+
+    if time:
+        normalised_data_df = pd.DataFrame(normalised_data, columns=[f"ch{i}" for i in range(1, normalised_data.shape[1] + 1)])
+        return pd.concat([df.t, normalised_data_df], axis=1).rename({"0": "t"})
+
+    return pd.DataFrame(normalised_data, columns=[f"ch{i}" for i in range(1, normalised_data.shape[1] + 1)])
+
+
 def calc_magnitude(df: pd.DataFrame, time: bool = True) -> pd.DataFrame:
     """
     Calculate magnitude from df of complex data
