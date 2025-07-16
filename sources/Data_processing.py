@@ -60,7 +60,6 @@ def calc_dPhase(df: pd.DataFrame, time: bool = True) -> pd.DataFrame:
 
     if time:
         point_data = df.drop(["t"], axis=1).to_numpy().reshape(-1, df.shape[1] // 2, 2)
-        diff_timeline = pd.Series(np.linspace(start=df.t.min(), stop=df.t.max(), num=df.shape[0] - 1))
     else:
         point_data = df.to_numpy().reshape(-1, df.shape[1] // 2, 2)
 
@@ -69,6 +68,8 @@ def calc_dPhase(df: pd.DataFrame, time: bool = True) -> pd.DataFrame:
 
     if time:
         d_phase_df = pd.DataFrame(d_phase_data, columns=[f"ch{i}" for i in range(1, d_phase_data.shape[1] + 1)])
-        return pd.concat([diff_timeline, d_phase_df], axis=1).rename({"0": "t"})
+        d_phase_df["t"] = np.linspace(start=df.t.min(), stop=df.t.max(), num=df.shape[0] - 1)
+        cols = ["t"] + [col for col in d_phase_df.columns if col != 't']
+        return d_phase_df.reindex(columns=cols)
 
     return pd.DataFrame(d_phase_data, columns=[f"ch{i}" for i in range(1, d_phase_data.shape[1] + 1)])
