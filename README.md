@@ -11,8 +11,11 @@ Instrument for monitoring and managing experimental data at a scientific facilit
 
 ## Build ```.exe```
 1. Run in terminal ```pip install pyinstaller``` (pip required)
-2. Then go to ```cd {dir of the app}``` and build by ```pyinstaller --onefile --add-data "templates;templates" app.py```
-```.exe``` file will be in the ```\dist``` dir.
+2. Ceate env folder ```python -m venv```
+3. Install requirements ```pip install -r requirements.txt```
+4. Then go to ```cd {dir of the app}``` and build by ```pyinstaller --onefile --paths venv/Lib/site-packages --add-data "templates;templates" --add-data "shtReader_py;shtReader_py" --add-data "sources;sources" app.py```
+
+The ```.exe``` file will be in the ```\dist``` dir.
 
 ## Technology
 - Programming language: Python.
