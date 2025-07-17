@@ -128,7 +128,8 @@ def save_files():
             for exp in new_experiments:
                 f.write(f"{exp}\n")
 
-        return jsonify({'message': f'Saved successfully to {output_file_path}.\nAdded {len(new_experiments)} new experiments.',
+        return jsonify({'message': f'Added {len(new_experiments)} new experiments.'
+                                   f'Saved successfully to \n{output_file_path}\n',
                         'new_experiments': new_experiments})
     except Exception as e:
         return jsonify({'error': str(e)}), 500

@@ -56,8 +56,6 @@ def calc_dPhase(df: pd.DataFrame, time: bool = True) -> pd.DataFrame:
     :param time: is first column is **t** - time
     :return:
     """
-    diff_timeline = None
-
     if time:
         point_data = df.drop(["t"], axis=1).to_numpy().reshape(-1, df.shape[1] // 2, 2)
     else:
