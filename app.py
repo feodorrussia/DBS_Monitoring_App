@@ -4,6 +4,9 @@ import re
 import json
 import sys
 
+from sources.Data_processing import normalise, calc_magnitude, calc_dPhase
+from sources.Files_operating import load_sht, save_df_to_txt
+
 if getattr(sys, 'frozen', False):
     template_folder = os.path.join(sys._MEIPASS, 'templates')
 else:
@@ -11,10 +14,44 @@ else:
 
 app = Flask(__name__, template_folder=template_folder)
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.abspath(os.path.dirname(sys.argv[0]))
+# print(ROOT_DIR)
 
+os.makedirs(ROOT_DIR + "/info", exist_ok=True)
+
+
+# Сохранение настроек
+def save_settings():
+    with open(settings_file, 'w') as f:
+        json.dump(settings, f, indent=4)
+
+
+# Парсинг метаданных
+def meta_parsing(header: str, ch_metadata: dict, is_converted: bool = False) -> str:
+    """
+
+    :param header:
+    :param ch_metadata:
+    :param is_converted:
+    :return:
+    """
+    text = header + "\n"
+
+    if is_converted:
+        text += "Header for converted files.\n"
+    else:
+        text += "Header for proceeded files.\n"
+    text += "-" * 20 + "\n"
+
+    if ch_metadata["n_ch"] != 0:
+        # TODO parsing channels data
+        return text + f"N channels: {ch_metadata['n_ch']}"
+    return text + "No channels set"
+
+
+# TODO make feature to set & select names of setting (templates)
 # Загрузка настроек
-settings_file = os.path.join(ROOT_DIR, 'settings.json')
+settings_file = os.path.join(ROOT_DIR, 'info/settings.json')
 if os.path.exists(settings_file):
     with open(settings_file, 'r') as f:
         settings = json.load(f)
@@ -29,14 +66,22 @@ else:
         "output_folder_A": "",
         "output_folder_dPh": "",
         "output_file": "experiments.txt",
-        "metadata_header": "Default metadata header"
+        "metadata_header": "Default metadata header",
+        "channels_metadata": {
+            "n_ch": 0,
+            "ch_meta": [],
+            "default_ch_meta": {
+                "ch_name": "ch0",
+                "freq": 0,
+                "ver_angle": 0,
+                "hor_angle": 0,
+                "height": 0,
+                "i_index": 0,
+                "q_index": 0,
+            }
+        }
     }
-
-
-# Сохранение настроек
-def save_settings():
-    with open(settings_file, 'w') as f:
-        json.dump(settings, f, indent=4)
+    save_settings()
 
 
 # Главная страница
@@ -171,6 +216,27 @@ def proceed_files():
         new_experiments = [exp for exp in experiments if exp not in existing_experiments]
         if not new_experiments:
             new_experiments = experiments
+
+        for file_num in new_experiments:
+            filename = settings['file_pattern'].replace("(\\d{" + f"{len(file_num)}" + "})", file_num)
+            file_path = os.path.join(settings['folder_path'], filename + settings['selected_file_type'])
+
+            df = load_sht(file_path)
+            norm_df = normalise(df)
+
+            save_df_to_txt(df, file_num, settings["output_folder_txt"],
+                           meta=meta_parsing(settings['metadata_header'], settings['channels_metadata']))
+
+            magnitude = calc_magnitude(norm_df)
+            save_df_to_txt(magnitude, f"{file_num}_A", settings["output_folder_A"],
+                           meta=meta_parsing(settings['metadata_header'], settings['channels_metadata']))
+
+            d_phase = calc_dPhase(norm_df)
+            save_df_to_txt(d_phase, f"{file_num}_dPh", settings["output_folder_dPh"],
+                           meta=meta_parsing(settings['metadata_header'], settings['channels_metadata']))
+
+        # TODO loading bar on page while processing
+        # TODO separated processing files (by one)
 
         return jsonify({'message': f'Proceeded {len(new_experiments)} experiments.\n\n'
                                    f'All files converted successfully to \n{output_folder_txt}\n'
