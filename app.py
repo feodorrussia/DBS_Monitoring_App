@@ -25,6 +25,9 @@ else:
         "file_types": [".SHT", ".dat", ".txt", "All files (*.*)"],
         "selected_file_type": ".SHT",
         "output_folder": "",
+        "output_folder_txt": "",
+        "output_folder_A": "",
+        "output_folder_dPh": "",
         "output_file": "experiments.txt",
         "metadata_header": "Default metadata header"
     }
@@ -101,12 +104,10 @@ def save_files():
         experiments = data.get('experiments', [])
         output_folder = data.get('output_folder', settings.get('output_folder', ''))
         output_file = data.get('output_file', settings.get('output_file', 'experiments.txt'))
-        metadata_header = data.get('metadata_header', settings.get('metadata_header', ''))
 
         # Обновление настроек
         settings['output_folder'] = output_folder
         settings['output_file'] = output_file
-        settings['metadata_header'] = metadata_header
         save_settings()
 
         # Полный путь к выходному файлу
@@ -128,6 +129,52 @@ def save_files():
                 f.write(f"{exp}\n")
 
         return jsonify({'message': f'Saved successfully to {output_file_path}.\nAdded {len(new_experiments)} new experiments.',
+                        'new_experiments': new_experiments})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# Обработка файлов
+@app.route('/proceed', methods=['POST'])
+def proceed_files():
+    try:
+        data = request.json
+        experiments = data.get('experiments', [])
+        output_folder = data.get('output_folder', settings.get('output_folder', ''))
+        output_file = data.get('output_file', settings.get('output_file', 'experiments.txt'))
+        output_folder_txt = data.get('output_folder_txt', settings.get('output_folder_txt', ''))
+        output_folder_A = data.get('output_folder_A', settings.get('output_folder_A', ''))
+        output_folder_dPh = data.get('output_folder_dPh', settings.get('output_folder_dPh', ''))
+        metadata_header = data.get('metadata_header', settings.get('metadata_header', ''))
+
+        # Обновление настроек
+        settings['output_folder'] = output_folder
+        settings['output_file'] = output_file
+        settings['output_folder_txt'] = output_folder_txt
+        settings['output_folder_A'] = output_folder_A
+        settings['output_folder_dPh'] = output_folder_dPh
+        settings['metadata_header'] = metadata_header
+        save_settings()
+
+        # Полный путь к выходному файлу
+        output_file_path = os.path.join(output_folder, output_file)
+
+        # Чтение уже сохранённых экспериментов
+        existing_experiments = set()
+        if os.path.exists(output_file_path):
+            with open(output_file_path, 'r') as f:
+                for line in f:
+                    existing_experiments.add(line.strip())
+
+        # Новые эксперименты для добавления
+        new_experiments = [exp for exp in experiments if exp not in existing_experiments]
+        if not new_experiments:
+            new_experiments = experiments
+
+        return jsonify({'message': f'Proceeded {len(new_experiments)} experiments.\n\n'
+                                   f'All files converted successfully to \n{output_folder_txt}\n'
+                                   f'Magnitude saved to \n{output_folder_A}\n'
+                                   f'Diff of the Phase saved to \n{output_folder_dPh}\n',
                         'new_experiments': new_experiments})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
