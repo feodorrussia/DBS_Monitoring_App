@@ -46,7 +46,7 @@ def save_df_to_txt(df: pd.DataFrame, file_name: str, file_path: str, meta: str =
     :param meta: (optional) additional meta info
     :return:
     """
-    file_path_name = file_path + file_name + ".txt"
+    file_path_name = os.path.join(file_path, file_name + ".txt")
     pd_save_mode = "w"
     if meta is not None:
         line_width = 70
