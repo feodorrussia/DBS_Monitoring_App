@@ -71,6 +71,9 @@
         button:hover {
             background-color: #0056b3;
         }
+        button:disabled {
+            background-color: #7b7b7b;
+        }
         .status {
             color: #dc3545;
             font-weight: bold;
@@ -124,16 +127,28 @@
         <div class="results-column">
             <h2>Results</h2>
             <p id="status" class="status"></p>
-            <textarea id="experimentsList" rows="10"></textarea>
+            <label for="experimentsList">List of new shots:</label><textarea id="experimentsList" rows="10"></textarea>
             <div>
-                <button type="button" id="saveBtn">Save</button>
-            <button type="button" id="resetBtn">Reset</button>
+                <button type="button" id="saveBtn" disabled>Save</button>
+                <button type="button" id="resetBtn" disabled>Reset</button>
             </div>
 
+            <hr>
+
             <div id="metadata" style="margin-top: 20px; display: none;">
-                <h2>Metadata Header</h2>
-                <textarea id="metadataHeader" rows="5" placeholder="Enter metadata header">{{ settings.metadata_header }}</textarea>
+                <h2>Proceed info</h2>
+                <label for="outputFolder_txt">Converted files path:</label><input type="text" id="outputFolder_txt" name="outputFolder_txt" placeholder="Enter output directory path for .txt files" value="{{ settings.output_folder_txt }}">
+                <label for="outputFolder_A">Magnitude output path:</label><input type="text" id="outputFolder_A" name="outputFolder_A" placeholder="Enter output directory path for A data" value="{{ settings.output_folder_A }}">
+                <label for="outputFolder_dPh">Dif of the Phase output path:</label><input type="text" id="outputFolder_dPh" name="outputFolder_dPh" placeholder="Enter output directory path for dPh data" value="{{ settings.output_folder_dPh }}">
+
+                <label for="metadataHeader">Header for files:</label><textarea id="metadataHeader" rows="5" placeholder="Enter metadata header">{{ settings.metadata_header }}</textarea>
+                <button type="button" id="proceedBtn">Proceed</button>
+
+{#                <div style="margin-top: 10px;">#}
+{#                    <button type="button" id="proceedBtn">Proceed</button>#}
+{#                </div>#}
             </div>
+
         </div>
     </div>
 
@@ -180,6 +195,8 @@
                     document.getElementById('status').className = 'status success';
                     document.getElementById('experimentsList').value = data.experiments.join('\n');
                     document.getElementById('metadata').style.display = 'block';
+                    document.getElementById("saveBtn").disabled = false;
+                    document.getElementById("resetBtn").disabled = false;
                 }
             })
             .catch(error => {
@@ -192,7 +209,6 @@
             const experiments = document.getElementById('experimentsList').value.split('\n').filter(exp => exp.trim() !== '');
             const outputFolder = document.getElementById('outputFolder').value;
             const outputFile = document.getElementById('outputFile').value;
-            const metadataHeader = document.getElementById('metadataHeader').value;
 
             fetch('/save', {
                 method: 'POST',
@@ -202,7 +218,47 @@
                 body: JSON.stringify({
                     experiments: experiments,
                     output_folder: outputFolder,
+                    output_file: outputFile
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error saving file: ' + data.error);
+                } else {
+                    alert(data.message);
+                    document.getElementById('status').textContent = 'Saved ' + data.new_experiments.length + ' experiments.';
+                    document.getElementById('status').className = 'status success';
+                    document.getElementById('experimentsList').value = data.new_experiments.join('\n');
+                    document.getElementById('metadata').style.display = 'block';
+                }
+            })
+            .catch(error => {
+                alert('An error occurred: ' + error);
+            });
+        });
+
+        document.getElementById('proceedBtn').addEventListener('click', function() {
+            const experiments = document.getElementById('experimentsList').value.split('\n').filter(exp => exp.trim() !== '');
+            const outputFolder = document.getElementById('outputFolder').value;
+            const outputFile = document.getElementById('outputFile').value;
+            const outputFolder_txt = document.getElementById('outputFolder_txt').value;
+            const outputFolder_A = document.getElementById('outputFolder_A').value;
+            const outputFolder_dPh = document.getElementById('outputFolder_dPh').value;
+            const metadataHeader = document.getElementById('metadataHeader').value;
+
+            fetch('/proceed', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    experiments: experiments,
+                    output_folder: outputFolder,
                     output_file: outputFile,
+                    output_folder_txt: outputFolder_txt,
+                    output_folder_A: outputFolder_A,
+                    output_folder_dPh: outputFolder_dPh,
                     metadata_header: metadataHeader
                 })
             })
@@ -212,10 +268,10 @@
                     alert('Error saving file: ' + data.error);
                 } else {
                     alert(data.message);
-                    document.getElementById('experimentsList').value = '';
-                    document.getElementById('metadata').style.display = 'none';
-                    document.getElementById('status').textContent = '';
-                    document.getElementById('status').className = 'status';
+                    document.getElementById('status').textContent = 'Proceeded ' + data.new_experiments.length + ' experiments.';
+                    document.getElementById('status').className = 'status success';
+                    document.getElementById('experimentsList').value = data.new_experiments.join('\n');
+                    document.getElementById('metadata').style.display = 'block';
                 }
             })
             .catch(error => {
