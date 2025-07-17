@@ -247,6 +247,10 @@
             const outputFolder_dPh = document.getElementById('outputFolder_dPh').value;
             const metadataHeader = document.getElementById('metadataHeader').value;
 
+            document.getElementById("saveBtn").disabled = true;
+            document.getElementById("proceedBtn").disabled = true;
+            document.getElementById("resetBtn").disabled = true;
+
             fetch('/proceed', {
                 method: 'POST',
                 headers: {
@@ -266,16 +270,28 @@
             .then(data => {
                 if (data.error) {
                     alert('Error saving file: ' + data.error);
+
+                    document.getElementById("saveBtn").disabled = false;
+                    document.getElementById("proceedBtn").disabled = false;
+                    document.getElementById("resetBtn").disabled = false;
                 } else {
                     alert(data.message);
                     document.getElementById('status').textContent = 'Proceeded ' + data.new_experiments.length + ' experiments.';
                     document.getElementById('status').className = 'status success';
                     document.getElementById('experimentsList').value = data.new_experiments.join('\n');
                     document.getElementById('metadata').style.display = 'block';
+
+                    document.getElementById("saveBtn").disabled = false;
+                    document.getElementById("proceedBtn").disabled = false;
+                    document.getElementById("resetBtn").disabled = false;
                 }
             })
             .catch(error => {
                 alert('An error occurred: ' + error);
+
+                document.getElementById("saveBtn").disabled = false;
+                document.getElementById("proceedBtn").disabled = false;
+                document.getElementById("resetBtn").disabled = false;
             });
         });
 
