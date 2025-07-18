@@ -86,6 +86,12 @@
             border: 0;
             border-top: 1px solid #ccc;
         }
+        .channel_meta {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
@@ -98,7 +104,6 @@
             <h2>Input Settings</h2>
             <label for="folderPath">Input Directory Path:</label>
             <input type="text" id="folderPath" name="folderPath" placeholder="Enter directory path" value="{{ settings.folder_path }}">
-<!--            <button type="button" id="selectInputFolderBtn">Select Folder</button>-->
 
             <label for="filePattern">File Name Pattern:</label>
             <input type="text" id="filePattern" name="filePattern" placeholder="e.g., Dref(\d{5})" value="{{ settings.file_pattern }}">
@@ -115,7 +120,6 @@
             <h2>Output Settings</h2>
             <label for="outputFolder">Output Directory Path:</label>
             <input type="text" id="outputFolder" name="outputFolder" placeholder="Enter output directory path" value="{{ settings.output_folder }}">
-<!--            <button type="button" id="selectOutputFolderBtn">Select Folder</button>-->
 
             <label for="outputFile">Output File Name:</label>
             <input type="text" id="outputFile" name="outputFile" placeholder="e.g., experiments.txt" value="{{ settings.output_file }}">
@@ -133,8 +137,6 @@
                 <button type="button" id="resetBtn" disabled>Reset</button>
             </div>
 
-            <hr>
-
             <div id="metadata" style="margin-top: 20px; display: none;">
                 <h2>Proceed info</h2>
                 <label for="outputFolder_txt">Converted files path:</label><input type="text" id="outputFolder_txt" name="outputFolder_txt" placeholder="Enter output directory path for .txt files" value="{{ settings.output_folder_txt }}">
@@ -142,17 +144,293 @@
                 <label for="outputFolder_dPh">Dif of the Phase output path:</label><input type="text" id="outputFolder_dPh" name="outputFolder_dPh" placeholder="Enter output directory path for dPh data" value="{{ settings.output_folder_dPh }}">
 
                 <label for="metadataHeader">Header for files:</label><textarea id="metadataHeader" rows="5" placeholder="Enter metadata header">{{ settings.metadata_header }}</textarea>
-                <button type="button" id="proceedBtn">Proceed</button>
 
-{#                <div style="margin-top: 10px;">#}
-{#                    <button type="button" id="proceedBtn">Proceed</button>#}
-{#                </div>#}
+                <div>
+                    <button type="button" id="proceedBtn">Proceed</button>
+                    <p id="proceed_status" class="status"></p>
+                </div>
+
+                <hr>
+
+                <h2>Channels Metadata</h2>
+                <label for="n_ch">Number of channels:</label>
+                <input type="number" id="n_ch" value="{{ settings.channels_metadata.n_ch }}">
+                <div id="channels_container">
+                    {% for i in range(settings.channels_metadata.n_ch) %}
+                        <div class="channel_meta" data-index="{{ i }}">
+                            <h3>Channel {{ i }}</h3>
+                            <label for="ch_name_{{ i }}">Channel Name:</label>
+                            <input type="text" id="ch_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].ch_name }}">
+                            <label for="freq_name_{{ i }}">Frequency Name:</label>
+                            <input type="text" id="freq_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].freq.name }}">
+                            <label for="freq_value_{{ i }}">Frequency Value:</label>
+                            <input type="number" id="freq_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].freq.value }}">
+                            <label for="ver_angle_name_{{ i }}">Vertical Angle Name:</label>
+                            <input type="text" id="ver_angle_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].ver_angle.name }}">
+                            <label for="ver_angle_value_{{ i }}">Vertical Angle Value:</label>
+                            <input type="number" id="ver_angle_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].ver_angle.value }}">
+                            <label for="hor_angle_name_{{ i }}">Horizontal Angle Name:</label>
+                            <input type="text" id="hor_angle_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].hor_angle.name }}">
+                            <label for="hor_angle_value_{{ i }}">Horizontal Angle Value:</label>
+                            <input type="number" id="hor_angle_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].hor_angle.value }}">
+                            <label for="height_name_{{ i }}">Height Name:</label>
+                            <input type="text" id="height_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].height.name }}">
+                            <label for="height_value_{{ i }}">Height Value:</label>
+                            <input type="number" id="height_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].height.value }}">
+                            <label for="i_index_name_{{ i }}">I Index Name:</label>
+                            <input type="text" id="i_index_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].i_index.name }}">
+                            <label for="i_index_value_{{ i }}">I Index Value:</label>
+                            <input type="number" id="i_index_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].i_index.value }}">
+                            <label for="q_index_name_{{ i }}">Q Index Name:</label>
+                            <input type="text" id="q_index_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].q_index.name }}">
+                            <label for="q_index_value_{{ i }}">Q Index Value:</label>
+                            <input type="number" id="q_index_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].q_index.value }}">
+                        </div>
+                    {% endfor %}
+                </div>
             </div>
-
         </div>
     </div>
 
     <script>
+        function addChannelInputListeners(index) {
+            document.getElementById(`ch_name_${index}`).addEventListener('change', function() {
+                updateChMeta(index, 'ch_name', null, this.value);
+            });
+            document.getElementById(`freq_name_${index}`).addEventListener('change', function() {
+                updateChMeta(index, 'freq', 'name', this.value);
+            });
+            document.getElementById(`freq_value_${index}`).addEventListener('change', function() {
+                updateChMeta(index, 'freq', 'value', parseFloat(this.value));
+            });
+            document.getElementById(`ver_angle_name_${index}`).addEventListener('change', function() {
+                updateChMeta(index, 'ver_angle', 'name', this.value);
+            });
+            document.getElementById(`ver_angle_value_${index}`).addEventListener('change', function() {
+                updateChMeta(index, 'ver_angle', 'value', parseFloat(this.value));
+            });
+            document.getElementById(`hor_angle_name_${index}`).addEventListener('change', function() {
+                updateChMeta(index, 'hor_angle', 'name', this.value);
+            });
+            document.getElementById(`hor_angle_value_${index}`).addEventListener('change', function() {
+                updateChMeta(index, 'hor_angle', 'value', parseFloat(this.value));
+            });
+            document.getElementById(`height_name_${index}`).addEventListener('change', function() {
+                updateChMeta(index, 'height', 'name', this.value);
+            });
+            document.getElementById(`height_value_${index}`).addEventListener('change', function() {
+                updateChMeta(index, 'height', 'value', parseFloat(this.value));
+            });
+            document.getElementById(`i_index_name_${index}`).addEventListener('change', function() {
+                updateChMeta(index, 'i_index', 'name', this.value);
+            });
+            document.getElementById(`i_index_value_${index}`).addEventListener('change', function() {
+                updateChMeta(index, 'i_index', 'value', parseFloat(this.value));
+            });
+            document.getElementById(`q_index_name_${index}`).addEventListener('change', function() {
+                updateChMeta(index, 'q_index', 'name', this.value);
+            });
+            document.getElementById(`q_index_value_${index}`).addEventListener('change', function() {
+                updateChMeta(index, 'q_index', 'value', parseFloat(this.value));
+            });
+        }
+
+        function updateChMeta(index, field, subfield, value) {
+            let payload = {
+                index: index,
+                field: field,
+                value: value
+            };
+            if (subfield) {
+                payload.subfield = subfield;
+            }
+            fetch('/update_ch_meta', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function updateNCh(newNCh) {
+            fetch('/update_n_ch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({n_ch: newNCh})
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    updateChannelsContainer(data.channels_metadata);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function updateChannelsContainer(channels_metadata) {
+            const container = document.getElementById('channels_container');
+            container.innerHTML = '';
+            for (let i = 0; i < channels_metadata.n_ch; i++) {
+                const ch = channels_metadata.ch_meta[i];
+                const div = document.createElement('div');
+                div.className = 'channel_meta';
+                div.dataset.index = i;
+                div.innerHTML = `
+                    <h3>Channel ${i}</h3>
+                    <label for="ch_name_${i}">Channel Name:</label>
+                    <input type="text" id="ch_name_${i}" value="${ch.ch_name}">
+                    <label for="freq_name_${i}">Frequency Name:</label>
+                    <input type="text" id="freq_name_${i}" value="${ch.freq.name}">
+                    <label for="freq_value_${i}">Frequency Value:</label>
+                    <input type="number" id="freq_value_${i}" value="${ch.freq.value}">
+                    <label for="ver_angle_name_${i}">Vertical Angle Name:</label>
+                    <input type="text" id="ver_angle_name_${i}" value="${ch.ver_angle.name}">
+                    <label for="ver_angle_value_${i}">Vertical Angle Value:</label>
+                    <input type="number" id="ver_angle_value_${i}" value="${ch.ver_angle.value}">
+                    <label for="hor_angle_name_${i}">Horizontal Angle Name:</label>
+                    <input type="text" id="hor_angle_name_${i}" value="${ch.hor_angle.name}">
+                    <label for="hor_angle_value_${i}">Horizontal Angle Value:</label>
+                    <input type="number" id="hor_angle_value_${i}" value="${ch.hor_angle.value}">
+                    <label for="height_name_${i}">Height Name:</label>
+                    <input type="text" id="height_name_${i}" value="${ch.height.name}">
+                    <label for="height_value_${i}">Height Value:</label>
+                    <input type="number" id="height_value_${i}" value="${ch.height.value}">
+                    <label for="i_index_name_${i}">I Index Name:</label>
+                    <input type="text" id="i_index_name_${i}" value="${ch.i_index.name}">
+                    <label for="i_index_value_${i}">I Index Value:</label>
+                    <input type="number" id="i_index_value_${i}" value="${ch.i_index.value}">
+                    <label for="q_index_name_${i}">Q Index Name:</label>
+                    <input type="text" id="q_index_name_${i}" value="${ch.q_index.name}">
+                    <label for="q_index_value_${i}">Q Index Value:</label>
+                    <input type="number" id="q_index_value_${i}" value="${ch.q_index.value}">
+                `;
+                container.appendChild(div);
+                addChannelInputListeners(i);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const channelDivs = document.querySelectorAll('.channel_meta');
+            channelDivs.forEach(div => {
+                const index = div.dataset.index;
+                addChannelInputListeners(index);
+            });
+            document.getElementById('n_ch').addEventListener('change', function() {
+                updateNCh(parseInt(this.value));
+            });
+
+            const initProceedFields = () => {
+                document.getElementById('outputFolder_txt').value = "{{ settings.output_folder_txt }}";
+                document.getElementById('outputFolder_A').value = "{{ settings.output_folder_A }}";
+                document.getElementById('outputFolder_dPh').value = "{{ settings.output_folder_dPh }}";
+                document.getElementById('metadataHeader').value = "{{ settings.metadata_header }}";
+            };
+            initProceedFields();
+
+            // Обработчики для Proceed info
+            document.getElementById('outputFolder_txt').addEventListener('change', updateProceedSetting);
+            document.getElementById('outputFolder_A').addEventListener('change', updateProceedSetting);
+            document.getElementById('outputFolder_dPh').addEventListener('change', updateProceedSetting);
+            document.getElementById('metadataHeader').addEventListener('change', updateProceedSetting);
+        });
+
+        function updateProceedSetting(e) {
+            const field = e.target.id;
+            const value = e.target.value;
+            fetch('/update_proceed_setting', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({field, value})
+            });
+        }
+
+        async function processExperiments() {
+            const proceedBtn = document.getElementById('proceedBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const statusDiv = document.getElementById('proceed_status');
+
+            // Деактивация кнопок
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = true);
+
+            const experiments = document.getElementById('experimentsList').value.split('\n').filter(Boolean);
+            const total = experiments.length;
+            let processed = 0;
+
+            for (const exp of experiments) {
+                processed++;
+                statusDiv.textContent = `${processed}/${total}: Processing ${exp}`;
+
+                await fetch('/proceed_experiment', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({experiment_num: exp.trim()})
+                }).then(handleResponse).catch(handleError);
+            }
+
+            statusDiv.textContent = `Processed ${processed}/${total} experiments`;
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = false);
+        }
+
+        function handleResponse(response) {
+            if (!response.ok) throw new Error('Network error');
+            return response.json().then(data => {
+                if (data.error) throw new Error(data.error);
+            });
+        }
+
+        function handleError(error) {
+            console.error('Processing error:', error);
+            alert(`Error: ${error.message}`);
+        }
+
+        async function processExperiments() {
+            const experiments = document.getElementById('experimentsList').value.split('\n').filter(exp => exp.trim() !== '');
+            const total = experiments.length;
+            let processed = 0;
+            const statusDiv = document.getElementById('proceed_status');
+            for (const exp of experiments) {
+                const experiment_num = exp.trim();
+                statusDiv.textContent = `${processed}/${total}: Processing ${experiment_num}`;
+                await fetch('/proceed_experiment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({experiment_num: experiment_num})
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Error processing ' + experiment_num + ': ' + data.error);
+                    } else {
+                        processed++;
+                        statusDiv.textContent = `${processed}/${total}: Done ${experiment_num}`;
+                    }
+                })
+                .catch(error => {
+                    alert('Error: ' + error);
+                });
+            }
+            if (processed === total) {
+                alert('All experiments processed');
+            }
+        }
+
+        document.getElementById('proceedBtn').addEventListener('click', processExperiments);
+
         document.getElementById('resetBtn').addEventListener('click', function() {
             window.location.href = '/';
         });
@@ -238,62 +516,62 @@
             });
         });
 
-        document.getElementById('proceedBtn').addEventListener('click', function() {
-            const experiments = document.getElementById('experimentsList').value.split('\n').filter(exp => exp.trim() !== '');
-            const outputFolder = document.getElementById('outputFolder').value;
-            const outputFile = document.getElementById('outputFile').value;
-            const outputFolder_txt = document.getElementById('outputFolder_txt').value;
-            const outputFolder_A = document.getElementById('outputFolder_A').value;
-            const outputFolder_dPh = document.getElementById('outputFolder_dPh').value;
-            const metadataHeader = document.getElementById('metadataHeader').value;
-
-            document.getElementById("saveBtn").disabled = true;
-            document.getElementById("proceedBtn").disabled = true;
-            document.getElementById("resetBtn").disabled = true;
-
-            fetch('/proceed', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    experiments: experiments,
-                    output_folder: outputFolder,
-                    output_file: outputFile,
-                    output_folder_txt: outputFolder_txt,
-                    output_folder_A: outputFolder_A,
-                    output_folder_dPh: outputFolder_dPh,
-                    metadata_header: metadataHeader
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) {
-                    alert('Error saving file: ' + data.error);
-
-                    document.getElementById("saveBtn").disabled = false;
-                    document.getElementById("proceedBtn").disabled = false;
-                    document.getElementById("resetBtn").disabled = false;
-                } else {
-                    alert(data.message);
-                    document.getElementById('status').textContent = 'Proceeded ' + data.new_experiments.length + ' experiments.';
-                    document.getElementById('status').className = 'status success';
-                    document.getElementById('experimentsList').value = data.new_experiments.join('\n');
-                    document.getElementById('metadata').style.display = 'block';
-
-                    document.getElementById("saveBtn").disabled = false;
-                    document.getElementById("proceedBtn").disabled = false;
-                    document.getElementById("resetBtn").disabled = false;
-                }
-            })
-            .catch(error => {
-                alert('An error occurred: ' + error);
-
-                document.getElementById("saveBtn").disabled = false;
-                document.getElementById("proceedBtn").disabled = false;
-                document.getElementById("resetBtn").disabled = false;
-            });
-        });
+        // document.getElementById('proceedBtn').addEventListener('click', function() {
+        //     const experiments = document.getElementById('experimentsList').value.split('\n').filter(exp => exp.trim() !== '');
+        //     const outputFolder = document.getElementById('outputFolder').value;
+        //     const outputFile = document.getElementById('outputFile').value;
+        //     const outputFolder_txt = document.getElementById('outputFolder_txt').value;
+        //     const outputFolder_A = document.getElementById('outputFolder_A').value;
+        //     const outputFolder_dPh = document.getElementById('outputFolder_dPh').value;
+        //     const metadataHeader = document.getElementById('metadataHeader').value;
+        //
+        //     document.getElementById("saveBtn").disabled = true;
+        //     document.getElementById("proceedBtn").disabled = true;
+        //     document.getElementById("resetBtn").disabled = true;
+        //
+        //     fetch('/proceed', {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json'
+        //         },
+        //         body: JSON.stringify({
+        //             experiments: experiments,
+        //             output_folder: outputFolder,
+        //             output_file: outputFile,
+        //             output_folder_txt: outputFolder_txt,
+        //             output_folder_A: outputFolder_A,
+        //             output_folder_dPh: outputFolder_dPh,
+        //             metadata_header: metadataHeader
+        //         })
+        //     })
+        //     .then(response => response.json())
+        //     .then(data => {
+        //         if (data.error) {
+        //             alert('Error saving file: ' + data.error);
+        //
+        //             document.getElementById("saveBtn").disabled = false;
+        //             document.getElementById("proceedBtn").disabled = false;
+        //             document.getElementById("resetBtn").disabled = false;
+        //         } else {
+        //             alert(data.message);
+        //             document.getElementById('status').textContent = 'Proceeded ' + data.new_experiments.length + ' experiments.';
+        //             document.getElementById('status').className = 'status success';
+        //             document.getElementById('experimentsList').value = data.new_experiments.join('\n');
+        //             document.getElementById('metadata').style.display = 'block';
+        //
+        //             document.getElementById("saveBtn").disabled = false;
+        //             document.getElementById("proceedBtn").disabled = false;
+        //             document.getElementById("resetBtn").disabled = false;
+        //         }
+        //     })
+        //     .catch(error => {
+        //         alert('An error occurred: ' + error);
+        //
+        //         document.getElementById("saveBtn").disabled = false;
+        //         document.getElementById("proceedBtn").disabled = false;
+        //         document.getElementById("resetBtn").disabled = false;
+        //     });
+        // });
 
         document.getElementById('editSettingsBtn').addEventListener('click', function() {
             window.location.href = '/settings';

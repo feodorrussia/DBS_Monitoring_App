@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, jsonify
+import copy
+import json
 import os
 import re
-import json
 import sys
+
+from flask import Flask, render_template, request, jsonify
 
 from sources.Data_processing import normalise, calc_magnitude, calc_dPhase
 from sources.Files_operating import load_sht, save_df_to_txt
@@ -43,10 +45,21 @@ def meta_parsing(header: str, ch_metadata: dict, is_converted: bool = False) -> 
         text += "Header for proceeded files.\n"
     text += "-" * 20 + "\n"
 
-    if ch_metadata["n_ch"] != 0:
-        # TODO parsing channels data
-        return text + f"N channels: {ch_metadata['n_ch']}"
-    return text + "No channels set"
+    if ch_metadata["n_ch"] > 0:
+        text += f"Channels: {ch_metadata['n_ch']}\n"
+        for i, ch in enumerate(ch_metadata["ch_meta"]):
+            text += f"\nChannel {i}:\n"
+            text += f"  Name: {ch['ch_name']}\n"
+            text += f"  Frequency: {ch['freq']['value']} {ch['freq']['name']}\n"
+            text += f"  Vertical Angle: {ch['ver_angle']['value']} {ch['ver_angle']['name']}\n"
+            text += f"  Horizontal Angle: {ch['hor_angle']['value']} {ch['hor_angle']['name']}\n"
+            text += f"  Height: {ch['height']['value']} {ch['height']['name']}\n"
+            text += f"  I-index: {ch['i_index']['value']} {ch['i_index']['name']}\n"
+            text += f"  Q-index: {ch['q_index']['value']} {ch['q_index']['name']}\n"
+            text += "-" * 20 + "\n" if i < ch_metadata['n_ch'] - 1 else ""
+    else:
+        text += "No channels configured\n"
+    return text
 
 
 # TODO make feature to set & select names of setting (templates)
@@ -72,12 +85,12 @@ else:
             "ch_meta": [],
             "default_ch_meta": {
                 "ch_name": "ch0",
-                "freq": 0,
-                "ver_angle": 0,
-                "hor_angle": 0,
-                "height": 0,
-                "i_index": 0,
-                "q_index": 0,
+                "freq": {"name": "", "value": 0},
+                "ver_angle": {"name": "", "value": 0},
+                "hor_angle": {"name": "", "value": 0},
+                "height": {"name": "", "value": 0},
+                "i_index": {"name": "", "value": 0},
+                "q_index": {"name": "", "value": 0},
             }
         }
     }
@@ -176,6 +189,112 @@ def save_files():
         return jsonify({'message': f'Added {len(new_experiments)} new experiments.'
                                    f'Saved successfully to \n{output_file_path}\n',
                         'new_experiments': new_experiments})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/update_n_ch', methods=['POST'])
+def update_n_ch():
+    try:
+        data = request.json
+        new_n_ch = data.get('n_ch', 0)
+        if new_n_ch < 0:
+            return jsonify({'error': 'n_ch cannot be negative'}), 400
+        current_n_ch = settings['channels_metadata']['n_ch']
+        if new_n_ch > current_n_ch:
+            for _ in range(new_n_ch - current_n_ch):
+                settings['channels_metadata']['ch_meta'].append(
+                    copy.deepcopy(settings['channels_metadata']['default_ch_meta']))
+        elif new_n_ch < current_n_ch:
+            settings['channels_metadata']['ch_meta'] = settings['channels_metadata']['ch_meta'][:new_n_ch]
+        settings['channels_metadata']['n_ch'] = new_n_ch
+        save_settings()
+        return jsonify({'channels_metadata': settings['channels_metadata']})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/update_ch_meta', methods=['POST'])
+def update_ch_meta():
+    try:
+        data = request.json
+        index = data.get('index', None)
+        field = data.get('field', None)
+        subfield = data.get('subfield', None)
+        value = data.get('value', None)
+        if index is None or field is None or value is None:
+            return jsonify({'error': 'Missing parameters'}), 400
+        if index < 0 or index >= settings['channels_metadata']['n_ch']:
+            return jsonify({'error': 'Invalid channel index'}), 400
+        ch = settings['channels_metadata']['ch_meta'][index]
+        if subfield is None:
+            if field in ch:
+                ch[field] = value
+            else:
+                return jsonify({'error': 'Field not found'}), 400
+        else:
+            if field in ch and subfield in ch[field]:
+                ch[field][subfield] = value
+            else:
+                return jsonify({'error': 'Field or subfield not found'}), 400
+        save_settings()
+        return jsonify({'message': 'Updated successfully'})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/update_proceed_setting', methods=['POST'])
+def update_proceed_setting():
+    try:
+        data = request.json
+        field = data.get('field')
+        value = data.get('value')
+
+        if field in ['outputFolder_txt', 'outputFolder_A',
+                     'outputFolder_dPh', 'metadataHeader']:
+            settings[field] = value
+            save_settings()
+            return jsonify({'message': 'Setting updated'})
+        return jsonify({'error': 'Invalid field'}), 400
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@app.route('/proceed_experiment', methods=['POST'])
+def proceed_experiment():
+    try:
+        data = request.json
+        experiment_num = data.get('experiment_num')
+        if not experiment_num:
+            return jsonify({'error': 'Missing experiment_num'}), 400
+
+        # Получаем актуальные настройки
+        output_folder_txt = settings.get('output_folder_txt', '')
+        output_folder_A = settings.get('output_folder_A', '')
+        output_folder_dPh = settings.get('output_folder_dPh', '')
+        metadata_header = settings.get('metadata_header', '')
+
+        # Формируем путь к файлу
+        filename = f"{settings['file_pattern'].replace('(\\d{5})', experiment_num)}{settings['selected_file_type']}"
+        file_path = os.path.join(settings['folder_path'], filename)
+
+        # Обработка файла
+        df = load_sht(file_path)
+        norm_df = normalise(df)
+
+        # Сохранение с метаданными
+        save_df_to_txt(df, experiment_num, output_folder_txt,
+                       meta=meta_parsing(metadata_header, settings['channels_metadata'], True))
+
+        magnitude = calc_magnitude(norm_df)
+        save_df_to_txt(magnitude, f"{experiment_num}_A", output_folder_A,
+                       meta=meta_parsing(metadata_header, settings['channels_metadata']))
+
+        d_phase = calc_dPhase(norm_df)
+        save_df_to_txt(d_phase, f"{experiment_num}_dPh", output_folder_dPh,
+                       meta=meta_parsing(metadata_header, settings['channels_metadata']))
+
+        return jsonify({'message': f'Processed {experiment_num}'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
