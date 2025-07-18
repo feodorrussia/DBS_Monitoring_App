@@ -280,7 +280,7 @@ def proceed_experiment():
         output_folder_txt = settings.get('output_folder_txt', '').replace('\\', '/')
         output_folder_A = settings.get('output_folder_A', '').replace('\\', '/')
         output_folder_dPh = settings.get('output_folder_dPh', '').replace('\\', '/')
-        metadata_header = settings.get('metadata_header', '')
+        metadata_header = settings.get('metadata_header', '').replace('\\n', '\n')
 
         settings['output_folder_txt'] = output_folder_txt
         settings['output_folder_A'] = output_folder_A
