@@ -48,14 +48,11 @@ def meta_parsing(header: str, ch_metadata: dict, is_converted: bool = False) -> 
     if ch_metadata["n_ch"] > 0:
         text += f"Channels: {ch_metadata['n_ch']}\n"
         for i, ch in enumerate(ch_metadata["ch_meta"]):
-            text += f"\nChannel {i}:\n"
-            text += f"  Name: {ch['ch_name']}\n"
+            text += f"\nChannel {ch['ch_name']} (I: {ch['i_index']['value']}, Q: {ch['q_index']['value']}):\n"
             text += f"  {ch['freq']['name']}: {ch['freq']['value']}\n"
             text += f"  {ch['ver_angle']['name']}: {ch['ver_angle']['value']}\n"
             text += f"  {ch['hor_angle']['name']}: {ch['hor_angle']['value']}\n"
             text += f"  {ch['height']['name']}: {ch['height']['value']}\n"
-            text += f"  {ch['i_index']['name']}: {ch['i_index']['value']}\n"
-            text += f"  {ch['q_index']['name']}: {ch['q_index']['value']}\n"
             text += "-" * 20 + "\n" if i < ch_metadata['n_ch'] - 1 else ""
     else:
         text += "No channels configured\n"
@@ -122,10 +119,10 @@ def scan_files():
             return jsonify({'error': 'Output directory not found'}), 400
 
         # Обновление настроек
-        settings['folder_path'] = folder_path
+        settings['folder_path'] = folder_path.replace('\\', '/')
         settings['file_pattern'] = regex
         settings['selected_file_type'] = file_type
-        settings['output_folder'] = output_folder
+        settings['output_folder'] = output_folder.replace('\\', '/')
         settings['output_file'] = output_file
         save_settings()
 
@@ -164,7 +161,7 @@ def save_files():
         output_file = data.get('output_file', settings.get('output_file', 'experiments.txt'))
 
         # Обновление настроек
-        settings['output_folder'] = output_folder
+        settings['output_folder'] = output_folder.replace('\\', '/')
         settings['output_file'] = output_file
         save_settings()
 
@@ -252,7 +249,7 @@ def update_proceed_setting():
 
         if field in ['outputFolder_txt', 'outputFolder_A',
                      'outputFolder_dPh', 'metadataHeader']:
-            settings[field] = value
+            settings[field] = value.replace('\\', '/')
             save_settings()
             return jsonify({'message': 'Setting updated'})
         return jsonify({'error': 'Invalid field'}), 400
@@ -269,10 +266,16 @@ def proceed_experiment():
             return jsonify({'error': 'Missing experiment_num'}), 400
 
         # Получаем актуальные настройки
-        output_folder_txt = settings.get('output_folder_txt', '')
-        output_folder_A = settings.get('output_folder_A', '')
-        output_folder_dPh = settings.get('output_folder_dPh', '')
-        metadata_header = settings.get('metadata_header', '')
+        output_folder_txt = settings.get('output_folder_txt', '').replace('\\', '/')
+        output_folder_A = settings.get('output_folder_A', '').replace('\\', '/')
+        output_folder_dPh = settings.get('output_folder_dPh', '').replace('\\', '/')
+        metadata_header = settings.get('metadata_header', '').replace('\\', '/')
+
+        settings['output_folder_txt'] = output_folder_txt
+        settings['output_folder_A'] = output_folder_A
+        settings['output_folder_dPh'] = output_folder_dPh
+        settings['metadata_header'] = metadata_header
+        save_settings()
 
         # Формируем путь к файлу
         filename = f"{settings['file_pattern'].replace('(\\d{5})', experiment_num)}{settings['selected_file_type']}"
