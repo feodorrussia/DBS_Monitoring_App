@@ -291,26 +291,32 @@
                     <h3>Channel ${i}</h3>
                     <label for="ch_name_${i}">Channel Name:</label>
                     <input type="text" id="ch_name_${i}" value="${ch.ch_name}">
+
                     <label for="freq_name_${i}">Frequency Name:</label>
                     <input type="text" id="freq_name_${i}" value="${ch.freq.name}">
                     <label for="freq_value_${i}">Frequency Value:</label>
                     <input type="number" id="freq_value_${i}" value="${ch.freq.value}">
+
                     <label for="ver_angle_name_${i}">Vertical Angle Name:</label>
                     <input type="text" id="ver_angle_name_${i}" value="${ch.ver_angle.name}">
                     <label for="ver_angle_value_${i}">Vertical Angle Value:</label>
                     <input type="number" id="ver_angle_value_${i}" value="${ch.ver_angle.value}">
+
                     <label for="hor_angle_name_${i}">Horizontal Angle Name:</label>
                     <input type="text" id="hor_angle_name_${i}" value="${ch.hor_angle.name}">
                     <label for="hor_angle_value_${i}">Horizontal Angle Value:</label>
                     <input type="number" id="hor_angle_value_${i}" value="${ch.hor_angle.value}">
+
                     <label for="height_name_${i}">Height Name:</label>
                     <input type="text" id="height_name_${i}" value="${ch.height.name}">
                     <label for="height_value_${i}">Height Value:</label>
                     <input type="number" id="height_value_${i}" value="${ch.height.value}">
+
                     <label for="i_index_name_${i}">I Index Name:</label>
                     <input type="text" id="i_index_name_${i}" value="${ch.i_index.name}">
                     <label for="i_index_value_${i}">I Index Value:</label>
                     <input type="number" id="i_index_value_${i}" value="${ch.i_index.value}">
+
                     <label for="q_index_name_${i}">Q Index Name:</label>
                     <input type="text" id="q_index_name_${i}" value="${ch.q_index.name}">
                     <label for="q_index_value_${i}">Q Index Value:</label>
@@ -351,8 +357,13 @@
             const value = e.target.value;
             fetch('/update_proceed_setting', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({field, value})
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    field,
+                    value
+                })
             });
         }
 
@@ -371,45 +382,17 @@
 
             for (const exp of experiments) {
                 processed++;
-                statusDiv.textContent = `${processed}/${total}: Processing ${exp}`;
-
-                await fetch('/proceed_experiment', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({experiment_num: exp.trim()})
-                }).then(handleResponse).catch(handleError);
-            }
-
-            statusDiv.textContent = `Processed ${processed}/${total} experiments`;
-            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = false);
-        }
-
-        function handleResponse(response) {
-            if (!response.ok) throw new Error('Network error');
-            return response.json().then(data => {
-                if (data.error) throw new Error(data.error);
-            });
-        }
-
-        function handleError(error) {
-            console.error('Processing error:', error);
-            alert(`Error: ${error.message}`);
-        }
-
-        async function processExperiments() {
-            const experiments = document.getElementById('experimentsList').value.split('\n').filter(exp => exp.trim() !== '');
-            const total = experiments.length;
-            let processed = 0;
-            const statusDiv = document.getElementById('proceed_status');
-            for (const exp of experiments) {
                 const experiment_num = exp.trim();
                 statusDiv.textContent = `${processed}/${total}: Processing ${experiment_num}`;
+
                 await fetch('/proceed_experiment', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({experiment_num: experiment_num})
+                    body: JSON.stringify({
+                        experiment_num: experiment_num
+                    })
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -425,8 +408,14 @@
                 });
             }
             if (processed === total) {
-                alert('All experiments processed');
+                alert("Proceeded " + processed + " experiments.\n\nAll files converted successfully to\n{{  settings.output_folder_txt }}\nMagnitudes saved to \n{{ settings.output_folder_A }}\nDiffs of the Phase saved to \n{{ settings.output_folder_dPh }}\n");
+            } else {
+                alert("Errors occurred: " + total - processed + ".\nProceeded " + processed + "/" + total + " experiments.\n\nFiles converted to\n{{ settings.output_folder_txt }}\nMagnitudes saved to \n{{ settings.output_folder_A }}\nDiffs of the Phase saved to \n{{ settings.output_folder_dPh }}\n");
             }
+
+            statusDiv.textContent = '';
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = false);
+
         }
 
         document.getElementById('proceedBtn').addEventListener('click', processExperiments);
@@ -434,14 +423,6 @@
         document.getElementById('resetBtn').addEventListener('click', function() {
             window.location.href = '/';
         });
-
-        // document.getElementById('selectInputFolderBtn').addEventListener('click', function() {
-        //     alert('Folder selection is not supported in this web application. Please enter the path manually.');
-        // });
-        //
-        // document.getElementById('selectOutputFolderBtn').addEventListener('click', function() {
-        //     alert('Folder selection is not supported in this web application. Please enter the path manually.');
-        // });
 
         document.getElementById('executeBtn').addEventListener('click', function() {
             const folderPath = document.getElementById('folderPath').value;
@@ -515,63 +496,6 @@
                 alert('An error occurred: ' + error);
             });
         });
-
-        // document.getElementById('proceedBtn').addEventListener('click', function() {
-        //     const experiments = document.getElementById('experimentsList').value.split('\n').filter(exp => exp.trim() !== '');
-        //     const outputFolder = document.getElementById('outputFolder').value;
-        //     const outputFile = document.getElementById('outputFile').value;
-        //     const outputFolder_txt = document.getElementById('outputFolder_txt').value;
-        //     const outputFolder_A = document.getElementById('outputFolder_A').value;
-        //     const outputFolder_dPh = document.getElementById('outputFolder_dPh').value;
-        //     const metadataHeader = document.getElementById('metadataHeader').value;
-        //
-        //     document.getElementById("saveBtn").disabled = true;
-        //     document.getElementById("proceedBtn").disabled = true;
-        //     document.getElementById("resetBtn").disabled = true;
-        //
-        //     fetch('/proceed', {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json'
-        //         },
-        //         body: JSON.stringify({
-        //             experiments: experiments,
-        //             output_folder: outputFolder,
-        //             output_file: outputFile,
-        //             output_folder_txt: outputFolder_txt,
-        //             output_folder_A: outputFolder_A,
-        //             output_folder_dPh: outputFolder_dPh,
-        //             metadata_header: metadataHeader
-        //         })
-        //     })
-        //     .then(response => response.json())
-        //     .then(data => {
-        //         if (data.error) {
-        //             alert('Error saving file: ' + data.error);
-        //
-        //             document.getElementById("saveBtn").disabled = false;
-        //             document.getElementById("proceedBtn").disabled = false;
-        //             document.getElementById("resetBtn").disabled = false;
-        //         } else {
-        //             alert(data.message);
-        //             document.getElementById('status').textContent = 'Proceeded ' + data.new_experiments.length + ' experiments.';
-        //             document.getElementById('status').className = 'status success';
-        //             document.getElementById('experimentsList').value = data.new_experiments.join('\n');
-        //             document.getElementById('metadata').style.display = 'block';
-        //
-        //             document.getElementById("saveBtn").disabled = false;
-        //             document.getElementById("proceedBtn").disabled = false;
-        //             document.getElementById("resetBtn").disabled = false;
-        //         }
-        //     })
-        //     .catch(error => {
-        //         alert('An error occurred: ' + error);
-        //
-        //         document.getElementById("saveBtn").disabled = false;
-        //         document.getElementById("proceedBtn").disabled = false;
-        //         document.getElementById("resetBtn").disabled = false;
-        //     });
-        // });
 
         document.getElementById('editSettingsBtn').addEventListener('click', function() {
             window.location.href = '/settings';
