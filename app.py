@@ -50,12 +50,12 @@ def meta_parsing(header: str, ch_metadata: dict, is_converted: bool = False) -> 
         for i, ch in enumerate(ch_metadata["ch_meta"]):
             text += f"\nChannel {i}:\n"
             text += f"  Name: {ch['ch_name']}\n"
-            text += f"  Frequency: {ch['freq']['value']} {ch['freq']['name']}\n"
-            text += f"  Vertical Angle: {ch['ver_angle']['value']} {ch['ver_angle']['name']}\n"
-            text += f"  Horizontal Angle: {ch['hor_angle']['value']} {ch['hor_angle']['name']}\n"
-            text += f"  Height: {ch['height']['value']} {ch['height']['name']}\n"
-            text += f"  I-index: {ch['i_index']['value']} {ch['i_index']['name']}\n"
-            text += f"  Q-index: {ch['q_index']['value']} {ch['q_index']['name']}\n"
+            text += f"  {ch['freq']['name']}: {ch['freq']['value']}\n"
+            text += f"  {ch['ver_angle']['name']}: {ch['ver_angle']['value']}\n"
+            text += f"  {ch['hor_angle']['name']}: {ch['hor_angle']['value']}\n"
+            text += f"  {ch['height']['name']}: {ch['height']['value']}\n"
+            text += f"  {ch['i_index']['name']}: {ch['i_index']['value']}\n"
+            text += f"  {ch['q_index']['name']}: {ch['q_index']['value']}\n"
             text += "-" * 20 + "\n" if i < ch_metadata['n_ch'] - 1 else ""
     else:
         text += "No channels configured\n"
@@ -85,12 +85,12 @@ else:
             "ch_meta": [],
             "default_ch_meta": {
                 "ch_name": "ch0",
-                "freq": {"name": "", "value": 0},
-                "ver_angle": {"name": "", "value": 0},
-                "hor_angle": {"name": "", "value": 0},
-                "height": {"name": "", "value": 0},
-                "i_index": {"name": "", "value": 0},
-                "q_index": {"name": "", "value": 0},
+                "freq": {"name": "Frequency", "value": 0},
+                "ver_angle": {"name": "Vertical Angle", "value": 0},
+                "hor_angle": {"name": "Horizontal Angle", "value": 0},
+                "height": {"name": "Height", "value": 0},
+                "i_index": {"name": "I-index", "value": 0},
+                "q_index": {"name": "Q-index", "value": 0},
             }
         }
     }
