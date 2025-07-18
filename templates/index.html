@@ -110,7 +110,7 @@
         <div class="form-column">
             <h2>Input Settings</h2>
             <label for="folderPath">Input Directory Path:</label>
-            <input type="text" id="folderPath" name="folderPath" placeholder="Enter directory path" value="{{ settings.folder_path }}">
+            <input type="text" id="folderPath" name="folderPath" placeholder="Enter directory path" value="{{ settings.folder_path.replace('\\', '/') }}">
 
             <label for="filePattern">File Name Pattern:</label>
             <input type="text" id="filePattern" name="filePattern" placeholder="e.g., Dref(\d{5})" value="{{ settings.file_pattern }}">
@@ -126,7 +126,7 @@
 
             <h2>Output Settings</h2>
             <label for="outputFolder">Output Directory Path:</label>
-            <input type="text" id="outputFolder" name="outputFolder" placeholder="Enter output directory path" value="{{ settings.output_folder }}">
+            <input type="text" id="outputFolder" name="outputFolder" placeholder="Enter output directory path" value="{{ settings.output_folder.replace('\\', '/') }}">
 
             <label for="outputFile">Output File Name:</label>
             <input type="text" id="outputFile" name="outputFile" placeholder="e.g., experiments.txt" value="{{ settings.output_file }}">
@@ -146,9 +146,9 @@
 
             <div id="metadata" style="margin-top: 20px; display: none;">
                 <h2>Proceed info</h2>
-                <label for="outputFolder_txt">Converted files path:</label><input type="text" id="outputFolder_txt" name="outputFolder_txt" placeholder="Enter output directory path for .txt files" value="{{ settings.output_folder_txt }}">
-                <label for="outputFolder_A">Magnitude output path:</label><input type="text" id="outputFolder_A" name="outputFolder_A" placeholder="Enter output directory path for A data" value="{{ settings.output_folder_A }}">
-                <label for="outputFolder_dPh">Dif of the Phase output path:</label><input type="text" id="outputFolder_dPh" name="outputFolder_dPh" placeholder="Enter output directory path for dPh data" value="{{ settings.output_folder_dPh }}">
+                <label for="outputFolder_txt">Converted files path:</label><input type="text" id="outputFolder_txt" name="outputFolder_txt" placeholder="Enter output directory path for .txt files" value="{{ settings.output_folder_txt.replace('\\', '/') }}">
+                <label for="outputFolder_A">Magnitude output path:</label><input type="text" id="outputFolder_A" name="outputFolder_A" placeholder="Enter output directory path for A data" value="{{ settings.output_folder_A.replace('\\', '/') }}">
+                <label for="outputFolder_dPh">Dif of the Phase output path:</label><input type="text" id="outputFolder_dPh" name="outputFolder_dPh" placeholder="Enter output directory path for dPh data" value="{{ settings.output_folder_dPh.replace('\\', '/') }}">
 
                 <label for="metadataHeader">Header for files:</label><textarea id="metadataHeader" rows="5" placeholder="Enter metadata header">{{ settings.metadata_header }}</textarea>
 
@@ -225,6 +225,12 @@
         }
 
         function updateChMeta(index, field, subfield, value) {
+            const proceedBtn = document.getElementById('proceedBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = true);
+
             let payload = {
                 index: index,
                 field: field,
@@ -247,9 +253,17 @@
                 }
             })
             .catch(error => console.error('Error:', error));
+
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = false);
         }
 
         function updateNCh(newNCh) {
+            const proceedBtn = document.getElementById('proceedBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = true);
+
             fetch('/update_n_ch', {
                 method: 'POST',
                 headers: {
@@ -266,9 +280,17 @@
                 }
             })
             .catch(error => console.error('Error:', error));
+
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = false);
         }
 
         function updateChannelsContainer(channels_metadata) {
+            const proceedBtn = document.getElementById('proceedBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = true);
+
             const container = document.getElementById('channels_container');
             container.innerHTML = '';
             for (let i = 0; i < channels_metadata.n_ch; i++) {
@@ -308,6 +330,8 @@
                 container.appendChild(div);
                 addChannelInputListeners(i);
             }
+
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = false);
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -336,6 +360,12 @@
         });
 
         function updateProceedSetting(e) {
+            const proceedBtn = document.getElementById('proceedBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = true);
+
             const field = e.target.id;
             const value = e.target.value;
             fetch('/update_proceed_setting', {
@@ -348,6 +378,8 @@
                     value
                 })
             });
+
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = false);
         }
 
         async function processExperiments() {
@@ -397,7 +429,6 @@
 
             statusDiv.textContent = '';
             [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = false);
-
         }
 
         document.getElementById('proceedBtn').addEventListener('click', processExperiments);
@@ -407,6 +438,12 @@
         });
 
         document.getElementById('executeBtn').addEventListener('click', function() {
+            const proceedBtn = document.getElementById('proceedBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = true);
+
             const folderPath = document.getElementById('folderPath').value;
             const filePattern = document.getElementById('filePattern').value;
             const fileType = document.getElementById('fileType').value;
@@ -444,9 +481,17 @@
                 document.getElementById('status').textContent = 'An error occurred: ' + error;
                 document.getElementById('status').className = 'status';
             });
+
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = false);
         });
 
         document.getElementById('saveBtn').addEventListener('click', function() {
+            const proceedBtn = document.getElementById('proceedBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const resetBtn = document.getElementById('resetBtn');
+
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = true);
+
             const experiments = document.getElementById('experimentsList').value.split('\n').filter(exp => exp.trim() !== '');
             const outputFolder = document.getElementById('outputFolder').value;
             const outputFile = document.getElementById('outputFile').value;
@@ -477,6 +522,8 @@
             .catch(error => {
                 alert('An error occurred: ' + error);
             });
+
+            [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = false);
         });
 
         document.getElementById('editSettingsBtn').addEventListener('click', function() {
