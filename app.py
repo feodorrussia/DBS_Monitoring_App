@@ -215,7 +215,7 @@ def update_n_ch():
 def update_ch_meta():
     try:
         data = request.json
-        index = data.get('index', None)
+        index = int(data.get('index', None))
         field = data.get('field', None)
         subfield = data.get('subfield', None)
         value = data.get('value', None)
