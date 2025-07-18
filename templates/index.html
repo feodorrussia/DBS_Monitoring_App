@@ -356,7 +356,6 @@
             const resetBtn = document.getElementById('resetBtn');
             const statusDiv = document.getElementById('proceed_status');
 
-            // Деактивация кнопок
             [proceedBtn, saveBtn, resetBtn].forEach(btn => btn.disabled = true);
 
             const experiments = document.getElementById('experimentsList').value.split('\n').filter(Boolean);
@@ -364,7 +363,6 @@
             let processed = 0;
 
             for (const exp of experiments) {
-                processed++;
                 const experiment_num = exp.trim();
                 statusDiv.textContent = `${processed}/${total}: Processing ${experiment_num}`;
 
@@ -391,9 +389,10 @@
                 });
             }
             if (processed === total) {
-                alert("Proceeded " + processed + " experiments.\n\nAll files converted successfully to\n{{  settings.output_folder_txt }}\nMagnitudes saved to \n{{ settings.output_folder_A }}\nDiffs of the Phase saved to \n{{ settings.output_folder_dPh }}\n");
+                alert("Proceeded " + processed + " experiments.\n\nAll files converted successfully to\n{{  settings.output_folder_txt.replace('\\', '/') }}\nMagnitudes saved to \n{{ settings.output_folder_A.replace('\\', '/') }}\nDiffs of the Phase saved to \n{{ settings.output_folder_dPh.replace('\\', '/') }}\n");
             } else {
-                alert("Errors occurred: " + total - processed + ".\nProceeded " + processed + "/" + total + " experiments.\n\nFiles converted to\n{{ settings.output_folder_txt }}\nMagnitudes saved to \n{{ settings.output_folder_A }}\nDiffs of the Phase saved to \n{{ settings.output_folder_dPh }}\n");
+                const err = total - processed;
+                alert("Errors occurred: " + err + ".\nProceeded " + processed + "/" + total + " experiments.\n\nFiles converted to\n{{ settings.output_folder_txt.replace('\\', '/') }}\nMagnitudes saved to \n{{ settings.output_folder_A.replace('\\', '/') }}\nDiffs of the Phase saved to \n{{ settings.output_folder_dPh.replace('\\', '/') }}\n");
             }
 
             statusDiv.textContent = '';
