@@ -92,6 +92,13 @@
             border: 1px solid #ddd;
             border-radius: 4px;
         }
+        .channel_meta input[type="number"] {
+            width: 50px;
+        }
+        .channel_head{
+            display:flex;
+            flex-direction:row;
+        }
     </style>
 </head>
 <body>
@@ -158,33 +165,33 @@
                 <div id="channels_container">
                     {% for i in range(settings.channels_metadata.n_ch) %}
                         <div class="channel_meta" data-index="{{ i }}">
-                            <h3>Channel {{ i }}</h3>
-                            <label for="ch_name_{{ i }}">Channel Name:</label>
-                            <input type="text" id="ch_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].ch_name }}">
-                            <label for="freq_name_{{ i }}">Frequency Name:</label>
-                            <input type="text" id="freq_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].freq.name }}">
-                            <label for="freq_value_{{ i }}">Frequency Value:</label>
-                            <input type="number" id="freq_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].freq.value }}">
-                            <label for="ver_angle_name_{{ i }}">Vertical Angle Name:</label>
-                            <input type="text" id="ver_angle_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].ver_angle.name }}">
-                            <label for="ver_angle_value_{{ i }}">Vertical Angle Value:</label>
-                            <input type="number" id="ver_angle_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].ver_angle.value }}">
-                            <label for="hor_angle_name_{{ i }}">Horizontal Angle Name:</label>
-                            <input type="text" id="hor_angle_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].hor_angle.name }}">
-                            <label for="hor_angle_value_{{ i }}">Horizontal Angle Value:</label>
-                            <input type="number" id="hor_angle_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].hor_angle.value }}">
-                            <label for="height_name_{{ i }}">Height Name:</label>
-                            <input type="text" id="height_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].height.name }}">
-                            <label for="height_value_{{ i }}">Height Value:</label>
-                            <input type="number" id="height_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].height.value }}">
-                            <label for="i_index_name_{{ i }}">I Index Name:</label>
-                            <input type="text" id="i_index_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].i_index.name }}">
-                            <label for="i_index_value_{{ i }}">I Index Value:</label>
-                            <input type="number" id="i_index_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].i_index.value }}">
-                            <label for="q_index_name_{{ i }}">Q Index Name:</label>
-                            <input type="text" id="q_index_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].q_index.name }}">
-                            <label for="q_index_value_{{ i }}">Q Index Value:</label>
-                            <input type="number" id="q_index_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].q_index.value }}">
+                            <label for="ch_name_{{ i }}" style="font-size: 20px;">Channel:
+                                <input type="text" style="width: 50%; height: fit-content; vertical-align: center;" id="ch_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].ch_name }}" step="0.1">
+                            </label>
+
+                            <label for="freq_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].freq.name }} Value:
+                                <input type="number" id="freq_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].freq.value }}" step="0.1">
+                            </label>
+
+                            <label for="ver_angle_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].ver_angle.name }} Value:
+                                <input type="number" id="ver_angle_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].ver_angle.value }}" step="0.1">
+                            </label>
+
+                            <label for="hor_angle_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].hor_angle.name }} Value:
+                                <input type="number" id="hor_angle_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].hor_angle.value }}" step="0.1">
+                            </label>
+
+                            <label for="height_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].height.name }} Value:
+                                <input type="number" id="height_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].height.value }}" step="0.1">
+                            </label>
+
+                            <label for="i_index_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].i_index.name }} Value:
+                                <input type="number" id="i_index_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].i_index.value }}" step="0.1">
+                            </label>
+
+                            <label for="q_index_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].q_index.name }} Value:
+                            <input type="number" id="q_index_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].q_index.value }}" step="0.1">
+                            </label>
                         </div>
                     {% endfor %}
                 </div>
@@ -197,38 +204,20 @@
             document.getElementById(`ch_name_${index}`).addEventListener('change', function() {
                 updateChMeta(index, 'ch_name', null, this.value);
             });
-            document.getElementById(`freq_name_${index}`).addEventListener('change', function() {
-                updateChMeta(index, 'freq', 'name', this.value);
-            });
             document.getElementById(`freq_value_${index}`).addEventListener('change', function() {
                 updateChMeta(index, 'freq', 'value', parseFloat(this.value));
-            });
-            document.getElementById(`ver_angle_name_${index}`).addEventListener('change', function() {
-                updateChMeta(index, 'ver_angle', 'name', this.value);
             });
             document.getElementById(`ver_angle_value_${index}`).addEventListener('change', function() {
                 updateChMeta(index, 'ver_angle', 'value', parseFloat(this.value));
             });
-            document.getElementById(`hor_angle_name_${index}`).addEventListener('change', function() {
-                updateChMeta(index, 'hor_angle', 'name', this.value);
-            });
             document.getElementById(`hor_angle_value_${index}`).addEventListener('change', function() {
                 updateChMeta(index, 'hor_angle', 'value', parseFloat(this.value));
-            });
-            document.getElementById(`height_name_${index}`).addEventListener('change', function() {
-                updateChMeta(index, 'height', 'name', this.value);
             });
             document.getElementById(`height_value_${index}`).addEventListener('change', function() {
                 updateChMeta(index, 'height', 'value', parseFloat(this.value));
             });
-            document.getElementById(`i_index_name_${index}`).addEventListener('change', function() {
-                updateChMeta(index, 'i_index', 'name', this.value);
-            });
             document.getElementById(`i_index_value_${index}`).addEventListener('change', function() {
                 updateChMeta(index, 'i_index', 'value', parseFloat(this.value));
-            });
-            document.getElementById(`q_index_name_${index}`).addEventListener('change', function() {
-                updateChMeta(index, 'q_index', 'name', this.value);
             });
             document.getElementById(`q_index_value_${index}`).addEventListener('change', function() {
                 updateChMeta(index, 'q_index', 'value', parseFloat(this.value));
@@ -288,39 +277,33 @@
                 div.className = 'channel_meta';
                 div.dataset.index = i;
                 div.innerHTML = `
-                    <h3>Channel ${i}</h3>
-                    <label for="ch_name_${i}">Channel Name:</label>
-                    <input type="text" id="ch_name_${i}" value="${ch.ch_name}">
+                    <label for="ch_name_${i}" style="font-size: 20px;">Channel:
+                    <input type="text" style="width: 50%; height: fit-content; vertical-align: center;" id="ch_name_${i}" value="${ch.ch_name}" step="0.1">
+                    </label>
 
-                    <label for="freq_name_${i}">Frequency Name:</label>
-                    <input type="text" id="freq_name_${i}" value="${ch.freq.name}">
-                    <label for="freq_value_${i}">Frequency Value:</label>
-                    <input type="number" id="freq_value_${i}" value="${ch.freq.value}">
+                    <label for="freq_value_${i}">${ch.freq.name} Value:
+                    <input type="number" id="freq_value_${i}" value="${ch.freq.value}" step="0.1">
+                    </label>
 
-                    <label for="ver_angle_name_${i}">Vertical Angle Name:</label>
-                    <input type="text" id="ver_angle_name_${i}" value="${ch.ver_angle.name}">
-                    <label for="ver_angle_value_${i}">Vertical Angle Value:</label>
-                    <input type="number" id="ver_angle_value_${i}" value="${ch.ver_angle.value}">
+                    <label for="ver_angle_value_${i}">${ch.ver_angle.name} Value:
+                    <input type="number" id="ver_angle_value_${i}" value="${ch.ver_angle.value}" step="0.1">
+                    </label>
 
-                    <label for="hor_angle_name_${i}">Horizontal Angle Name:</label>
-                    <input type="text" id="hor_angle_name_${i}" value="${ch.hor_angle.name}">
-                    <label for="hor_angle_value_${i}">Horizontal Angle Value:</label>
-                    <input type="number" id="hor_angle_value_${i}" value="${ch.hor_angle.value}">
+                    <label for="hor_angle_value_${i}">${ch.hor_angle.name} Value:
+                    <input type="number" id="hor_angle_value_${i}" value="${ch.hor_angle.value}" step="0.1">
+                    </label>
 
-                    <label for="height_name_${i}">Height Name:</label>
-                    <input type="text" id="height_name_${i}" value="${ch.height.name}">
-                    <label for="height_value_${i}">Height Value:</label>
-                    <input type="number" id="height_value_${i}" value="${ch.height.value}">
+                    <label for="height_value_${i}">${ch.height.name} Value:
+                    <input type="number" id="height_value_${i}" value="${ch.height.value}" step="0.1">
+                    </label>
 
-                    <label for="i_index_name_${i}">I Index Name:</label>
-                    <input type="text" id="i_index_name_${i}" value="${ch.i_index.name}">
-                    <label for="i_index_value_${i}">I Index Value:</label>
-                    <input type="number" id="i_index_value_${i}" value="${ch.i_index.value}">
+                    <label for="i_index_value_${i}">${ch.i_index.name} Value:
+                    <input type="number" id="i_index_value_${i}" value="${ch.i_index.value}" step="0.1">
+                    </label>
 
-                    <label for="q_index_name_${i}">Q Index Name:</label>
-                    <input type="text" id="q_index_name_${i}" value="${ch.q_index.name}">
-                    <label for="q_index_value_${i}">Q Index Value:</label>
-                    <input type="number" id="q_index_value_${i}" value="${ch.q_index.value}">
+                    <label for="q_index_value_${i}">${ch.q_index.name} Value:
+                    <input type="number" id="q_index_value_${i}" value="${ch.q_index.value}" step="0.1">
+                    </label>
                 `;
                 container.appendChild(div);
                 addChannelInputListeners(i);
