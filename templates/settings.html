@@ -35,8 +35,8 @@
     </style>
 </head>
 <body>
-    <h1>Edit Settings</h1>
-    <textarea id="settingsJson" rows="10" cols="50">{{ settings | tojson }}</textarea>
+    <h2>Edit Settings</h2>
+    <label for="settingsJson">App global params:</label><textarea id="settingsJson" rows="20" cols="50">{{ settings | tojson }}</textarea>
     <button type="button" id="backBtn">Back</button>
     <button type="button" id="resetBtn">Reset</button>
     <button type="button" id="saveSettingsBtn">Save</button>
