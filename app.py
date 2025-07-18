@@ -82,10 +82,10 @@ else:
             "ch_meta": [],
             "default_ch_meta": {
                 "ch_name": "ch0",
-                "freq": {"name": "Frequency", "value": 0},
+                "freq": {"name": "Frequency (GHz)", "value": 0},
                 "ver_angle": {"name": "Vertical Angle", "value": 0},
                 "hor_angle": {"name": "Horizontal Angle", "value": 0},
-                "height": {"name": "Height", "value": 0},
+                "height": {"name": "Height (cm)", "value": 0},
                 "i_index": {"name": "I-index", "value": 0},
                 "q_index": {"name": "Q-index", "value": 0},
             }
@@ -305,6 +305,8 @@ def proceed_experiment():
 # Страница настроек
 @app.route('/settings')
 def settings_page():
+    with open(settings_file, 'r') as f:
+        settings = json.load(f)
     return render_template('settings.html', settings=settings)
 
 
