@@ -91,13 +91,19 @@
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            float: left;
         }
         .channel_meta input[type="number"] {
             width: 50px;
         }
-        .channel_head{
-            display:flex;
-            flex-direction:row;
+        .field{
+            clear: both;
+            text-align: right;
+            line-height:25px;
+        }
+        .field label{
+            float: left;
+            padding-right: 10px;
         }
     </style>
 </head>
@@ -160,38 +166,50 @@
                 <hr>
 
                 <h2>Channels Metadata</h2>
-                <label for="n_ch">Number of channels:</label>
-                <input type="number" id="n_ch" value="{{ settings.channels_metadata.n_ch }}">
+                <label for="n_ch" style="font-size: 20px;">Number of channels:
+                <input type="number" id="n_ch" value="{{ settings.channels_metadata.n_ch }}" style="width: 50px;">
+                </label>
+
+                <hr>
+
                 <div id="channels_container">
                     {% for i in range(settings.channels_metadata.n_ch) %}
                         <div class="channel_meta" data-index="{{ i }}">
-                            <label for="ch_name_{{ i }}" style="font-size: 20px;">Channel:
+                            <div class="field">
+                                <label for="ch_name_{{ i }}" style="font-size: 20px;">Channel:</label>
                                 <input type="text" style="width: 50%; height: fit-content; vertical-align: center;" id="ch_name_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].ch_name }}" step="0.1">
-                            </label>
+                            </div>
 
-                            <label for="freq_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].freq.name }} Value:
+                            <div class="field">
+                                <label for="freq_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].freq.name }} Value:</label>
                                 <input type="number" id="freq_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].freq.value }}" step="0.1">
-                            </label>
 
-                            <label for="ver_angle_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].ver_angle.name }} Value:
+                            </div>
+
+                            <div class="field">
+                                <label for="ver_angle_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].ver_angle.name }} Value:</label>
                                 <input type="number" id="ver_angle_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].ver_angle.value }}" step="0.1">
-                            </label>
+                            </div>
 
-                            <label for="hor_angle_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].hor_angle.name }} Value:
+                            <div class="field">
+                                <label for="hor_angle_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].hor_angle.name }} Value:</label>
                                 <input type="number" id="hor_angle_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].hor_angle.value }}" step="0.1">
-                            </label>
+                            </div>
 
-                            <label for="height_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].height.name }} Value:
+                            <div class="field">
+                                <label for="height_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].height.name }} Value:</label>
                                 <input type="number" id="height_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].height.value }}" step="0.1">
-                            </label>
+                            </div>
 
-                            <label for="i_index_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].i_index.name }} Value:
-                                <input type="number" id="i_index_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].i_index.value }}" step="0.1">
-                            </label>
+                           <div class="field">
+                                 <label for="i_index_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].i_index.name }} Value:</label>
+                                <input type="number" id="i_index_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].i_index.value }}">
+                            </div>
 
-                            <label for="q_index_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].q_index.name }} Value:
-                            <input type="number" id="q_index_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].q_index.value }}" step="0.1">
-                            </label>
+                            <div class="field">
+                                <label for="q_index_value_{{ i }}">{{ settings.channels_metadata.ch_meta[i].q_index.name }} Value:</label>
+                                <input type="number" id="q_index_value_{{ i }}" value="{{ settings.channels_metadata.ch_meta[i].q_index.value }}">
+                            </div>
                         </div>
                     {% endfor %}
                 </div>
@@ -299,33 +317,40 @@
                 div.className = 'channel_meta';
                 div.dataset.index = i;
                 div.innerHTML = `
-                    <label for="ch_name_${i}" style="font-size: 20px;">Channel:
-                    <input type="text" style="width: 50%; height: fit-content; vertical-align: center;" id="ch_name_${i}" value="${ch.ch_name}" step="0.1">
-                    </label>
+                    <div class="field">
+                        <label for="ch_name_${i}" style="font-size: 20px;">Channel:</label>
+                        <input type="text" style="width: 50%; height: fit-content; vertical-align: center;" id="ch_name_${i}" value="${ch.ch_name}" step="0.1">
+                    </div>
 
-                    <label for="freq_value_${i}">${ch.freq.name} Value:
-                    <input type="number" id="freq_value_${i}" value="${ch.freq.value}" step="0.1">
-                    </label>
+                    <div class="field">
+                        <label for="freq_value_${i}">${ch.freq.name} Value:</label>
+                        <input type="number" id="freq_value_${i}" value="${ch.freq.value}" step="0.1">
+                    </div>
 
-                    <label for="ver_angle_value_${i}">${ch.ver_angle.name} Value:
-                    <input type="number" id="ver_angle_value_${i}" value="${ch.ver_angle.value}" step="0.1">
-                    </label>
+                    <div class="field">
+                        <label for="ver_angle_value_${i}">${ch.ver_angle.name} Value:</label>
+                        <input type="number" id="ver_angle_value_${i}" value="${ch.ver_angle.value}" step="0.1">
+                    </div>
 
-                    <label for="hor_angle_value_${i}">${ch.hor_angle.name} Value:
-                    <input type="number" id="hor_angle_value_${i}" value="${ch.hor_angle.value}" step="0.1">
-                    </label>
+                    <div class="field">
+                        <label for="hor_angle_value_${i}">${ch.hor_angle.name} Value:</label>
+                        <input type="number" id="hor_angle_value_${i}" value="${ch.hor_angle.value}" step="0.1">
+                    </div>
 
-                    <label for="height_value_${i}">${ch.height.name} Value:
-                    <input type="number" id="height_value_${i}" value="${ch.height.value}" step="0.1">
-                    </label>
+                    <div class="field">
+                        <label for="height_value_${i}">${ch.height.name} Value:</label>
+                        <input type="number" id="height_value_${i}" value="${ch.height.value}" step="0.1">
+                    </div>
 
-                    <label for="i_index_value_${i}">${ch.i_index.name} Value:
-                    <input type="number" id="i_index_value_${i}" value="${ch.i_index.value}" step="0.1">
-                    </label>
+                    <div class="field">
+                        <label for="i_index_value_${i}">${ch.i_index.name} Value:</label>
+                        <input type="number" id="i_index_value_${i}" value="${ch.i_index.value}">
+                    </div>
 
-                    <label for="q_index_value_${i}">${ch.q_index.name} Value:
-                    <input type="number" id="q_index_value_${i}" value="${ch.q_index.value}" step="0.1">
-                    </label>
+                    <div class="field">
+                        <label for="q_index_value_${i}">${ch.q_index.name} Value:</label>
+                        <input type="number" id="q_index_value_${i}" value="${ch.q_index.value}">
+                    </div>
                 `;
                 container.appendChild(div);
                 addChannelInputListeners(i);
