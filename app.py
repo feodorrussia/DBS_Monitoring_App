@@ -247,9 +247,20 @@ def update_proceed_setting():
         field = data.get('field')
         value = data.get('value')
 
+        field_to_key_dict = {
+            "outputFolder_txt": "output_folder_txt",
+            "outputFolder_A": "output_folder_A",
+            "outputFolder_dPh": "output_folder_dPh",
+            "metadataHeader": "metadata_header",
+        }
+
         if field in ['outputFolder_txt', 'outputFolder_A',
-                     'outputFolder_dPh', 'metadataHeader']:
-            settings[field] = value.replace('\\', '/')
+                     'outputFolder_dPh']:
+            settings[field_to_key_dict[field]] = value.replace('\\', '/')
+            save_settings()
+            return jsonify({'message': 'Setting updated'})
+        elif field == 'metadataHeader':
+            settings[field_to_key_dict[field]] = value.replace('\n', '\\n')
             save_settings()
             return jsonify({'message': 'Setting updated'})
         return jsonify({'error': 'Invalid field'}), 400
@@ -269,12 +280,11 @@ def proceed_experiment():
         output_folder_txt = settings.get('output_folder_txt', '').replace('\\', '/')
         output_folder_A = settings.get('output_folder_A', '').replace('\\', '/')
         output_folder_dPh = settings.get('output_folder_dPh', '').replace('\\', '/')
-        metadata_header = settings.get('metadata_header', '').replace('\\', '/')
+        metadata_header = settings.get('metadata_header', '')
 
         settings['output_folder_txt'] = output_folder_txt
         settings['output_folder_A'] = output_folder_A
         settings['output_folder_dPh'] = output_folder_dPh
-        settings['metadata_header'] = metadata_header
         save_settings()
 
         # Формируем путь к файлу
