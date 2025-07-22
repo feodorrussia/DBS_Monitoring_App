@@ -288,7 +288,7 @@ def proceed_experiment():
         save_settings()
 
         # Формируем путь к файлу
-        filename = f"{settings['file_pattern'].replace('(\\d{5})', experiment_num)}{settings['selected_file_type']}"
+        filename = settings['file_pattern'].replace('(\\d{5})', experiment_num) + settings['selected_file_type']
         file_path = os.path.join(settings['folder_path'], filename)
 
         # Обработка файла

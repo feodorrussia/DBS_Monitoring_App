@@ -56,13 +56,15 @@ def calc_dPhase(df: pd.DataFrame, time: bool = True) -> pd.DataFrame:
     :param time: is first column is **t** - time
     :return:
     """
+    time_delta = 1
     if time:
         point_data = df.drop(["t"], axis=1).to_numpy().reshape(-1, df.shape[1] // 2, 2)
+        time_delta = (df.t.max() - df.t.min()) / (len(df.t) - 1)
     else:
         point_data = df.to_numpy().reshape(-1, df.shape[1] // 2, 2)
 
     z_data = point_data[:, :, 0] + 1j * point_data[:, :, 1]
-    d_phase_data = np.diff(np.unwrap(np.angle(z_data), axis=0, period=np.pi), axis=0)
+    d_phase_data = np.diff(np.unwrap(np.angle(z_data), axis=0), axis=0) / (time_delta * 2 * np.pi * 1000)
 
     if time:
         d_phase_df = pd.DataFrame(d_phase_data, columns=[f"ch{i}" for i in range(1, d_phase_data.shape[1] + 1)])
