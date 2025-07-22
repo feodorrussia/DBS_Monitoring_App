@@ -288,7 +288,7 @@ def proceed_experiment():
         save_settings()
 
         # Формируем путь к файлу
-        filename = f"{settings['file_pattern'].replace('(\\d{5})', experiment_num)}{settings['selected_file_type']}"
+        filename = settings['file_pattern'].replace('(\\d{5})', experiment_num) + settings['selected_file_type']
         file_path = os.path.join(settings['folder_path'], filename)
 
         # Обработка файла
@@ -300,12 +300,10 @@ def proceed_experiment():
                        meta=meta_parsing(metadata_header, settings['channels_metadata'], True))
 
         magnitude = calc_magnitude(norm_df)
-        save_df_to_txt(magnitude, f"{experiment_num}_A", output_folder_A,
-                       meta=meta_parsing(metadata_header, settings['channels_metadata']))
+        save_df_to_txt(magnitude, f"{experiment_num}_A", output_folder_A)
 
         d_phase = calc_dPhase(norm_df)
-        save_df_to_txt(d_phase, f"{experiment_num}_dPh", output_folder_dPh,
-                       meta=meta_parsing(metadata_header, settings['channels_metadata']))
+        save_df_to_txt(d_phase, f"{experiment_num}_dPh", output_folder_dPh)
 
         return jsonify({'message': f'Processed {experiment_num}'})
     except Exception as e:

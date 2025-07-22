@@ -57,4 +57,4 @@ def save_df_to_txt(df: pd.DataFrame, file_name: str, file_path: str, meta: str =
             text_file.close()
         pd_save_mode = "a"
 
-    df.to_csv(file_path_name, index=False, mode=pd_save_mode)
+    df.to_csv(file_path_name, index=False, mode=pd_save_mode, sep='\t')
