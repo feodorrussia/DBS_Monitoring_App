@@ -62,7 +62,7 @@ def calc_dPhase(df: pd.DataFrame, time: bool = True) -> pd.DataFrame:
         point_data = df.to_numpy().reshape(-1, df.shape[1] // 2, 2)
 
     z_data = point_data[:, :, 0] + 1j * point_data[:, :, 1]
-    d_phase_data = np.diff(np.unwrap(np.angle(z_data), axis=0), axis=0)
+    d_phase_data = np.diff(np.unwrap(np.angle(z_data), axis=0, period=np.pi), axis=0)
 
     if time:
         d_phase_df = pd.DataFrame(d_phase_data, columns=[f"ch{i}" for i in range(1, d_phase_data.shape[1] + 1)])
